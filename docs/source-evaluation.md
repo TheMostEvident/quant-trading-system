@@ -1,55 +1,58 @@
-# 초기 시장·상품·API 및 환경 비교
+# 상품별 API와 실행 환경: 국내 선물 우선
 
-확인 기준일: 2026-11-03 (Asia/Seoul). 공식 문서·공식 샘플을 확인한 **기능 후보 비교**이며, 사용자 계좌로 인증하거나 메시지 수신·주문 시험을 수행한 결과가 아니다. 변경 가능한 호출·구독 제한은 Phase 1.1에서 재확인한다.
+확인·갱신: 2026-11-04 (Asia/Seoul). 사용자 선택은 국내 주식 현물·국내 선물·해외 선물·크립토 현물이며 첫 연결은 국내 선물이다. 키움증권·바이낸스는 우선 검토 서비스이다. 공식 자료 확인과 사용자 계좌 인증·수신·주문 시험은 구별한다.
 
-## 시장과 상품
+## 1. 상품별 연결 후보
 
-| 후보 | 초기 구현에 미치는 영향 | v0.1 판단 |
-| --- | --- | --- |
-| 국내 현물 매수·보유·보유분 매도 | 주 단위 수량, 보유분 범위의 매도, 현금·수수료 원장 | 우선 작업 가정 |
-| 국내 현물 공매도 | 차입·상품·계좌 가능 여부, 주문 제약과 비용 확인 필요 | 초기 어댑터의 지원 기능으로 표시하지 않음 |
-| 국내 선물 양방향 | 계약 수량·승수·만기·증거금·정산·롤오버 처리 필요 | 공통 계약에 확장 지점을 남기고 후속 선택 |
-| 해외·크립토 등 | 별도 거래소·시간·통화·수량·주문 규칙 필요 | 초기 범위 밖; 동일 인터페이스로 확장 가능 여부를 추후 검토 |
-
-국내 현물 우선은 원장·집행 경로를 작은 범위에서 검증하기 위한 엔지니어링 선택이다. 양방향 매매가 핵심 연구 목표로 확정되면 선물 전용 InstrumentSpec과 원장 규칙부터 추가한다.
-
-## API 후보 비교
-
-| 후보 | 공식 자료에서 확인한 범위 | 연결 전 확인할 항목 | 판단 |
+| 상품 | 경로 | 공식 안내에서 확인한 것 | 현재 판단 |
 | --- | --- | --- | --- |
-| 한국투자 KIS | REST·WebSocket, 국내주식·국내선물옵션 등 상품별 공식 예제와 실전/모의 환경 구분 | 사용자 이용 가능 계좌, 피드·체결 통보·조회 필드, 환경별 제약과 호가 재동기화 | 첫 수집 어댑터 우선 검토 후보 |
-| 키움 REST API | REST·WebSocket 예제와 운영체제별 안내, 실전/모의 키 및 IP 등록 안내 | 필요한 상품 지원, 등록 IP·실행 위치, 피드 및 모의환경 지원 범위 | 이식성 있는 대안 후보 |
-| 키움 OpenAPI+ | Windows COM 방식과 상품·모의환경 안내 | Windows 실행·로그인 환경, 선택 상품의 필드·이벤트 및 연결 관리 | 해당 환경이 필요한 경우 비교 |
+| 국내 선물 | 키움 OpenAPI+ | 코스피200 선물과 Windows COM/OCX 방식 | 최초 수집·모의 검증의 우선 경로 |
+| 국내 개별주식선물 | 키움의 상품별 실제 명세·서비스 확인 필요 | 위 안내만으로 지원을 단정할 수 없음 | 목표 범위에 유지; 기능 확인 전 지원 표시 금지 |
+| 해외 선물 | 키움 해외파생 OpenAPI-W | 별도 해외선물 서비스·Windows COM 경로 | 별도 어댑터로 후속 검증 |
+| 국내 주식 현물 | 키움 OpenAPI+ / REST | 상품과 실행 방식이 다른 서비스 | 현물 연결 때 기능·운영 조건으로 선택 |
+| 크립토 현물 | Binance Spot API | 공식 REST/WebSocket·자산/주문 필터·사용자 이벤트 문서 | 현물 전용 어댑터 후속 검증 |
+| 대체 증권 경로 | KIS | 이전에 비교한 상품별 예제·REST/WebSocket 경로 | 사용자 선호의 우선 경로에서 제외; 필요 시 대안 검토 |
 
-키움 REST API와 키움 OpenAPI+를 같은 제약의 서비스로 취급하지 않는다. KIS를 우선 검토하는 이유는 현재 확인한 상품별 공식 샘플과 독립적인 REST/WebSocket 어댑터 경계가 초기 범위에 맞기 때문이다. 계좌 보유·접근 가능성을 확인하지 않았으므로 사용자에게 해당 증권사가 확정되었다고 표시하지 않는다.
+키움 REST의 멀티 OS 안내를 국내 선물 지원 근거로 사용하지 않는다. 현재 공식 상품 안내는 REST와 OpenAPI+ 및 해외파생 경로를 구분한다. API 기능 추가나 변경은 연결 시 다시 확인한다.
 
-## 데이터 경로 구분
+## 2. 최초 국내 선물 연결의 확인 목록
 
-| 자료 | 초기 역할 | 확정 시점 |
-| --- | --- | --- |
-| 증권사 호가·체결 | Layer 1의 실시간 관측과 원천 기록 | Phase 1.1의 연결·필드 검증 |
-| DART·KIND·네이버·EDGAR 후보 | Layer 3 이벤트 입력; 실제 본문과 검색 메타데이터 구분 | Phase 2.1에서 지원 소스·범위 확정 |
-| KRX 종목기본·일별 통계 | Layer 0 후보 마스터·일별 배경 자료 | Phase 3.1에서 소스 카탈로그 확정 |
-| seed InstrumentSpec·기업 매핑 | Layer 1·3 독립 검증용 한정 입력 | Phase 0 규격·Phase 1/2 fixture |
+- 사용자에게 이용 가능한 선물 계좌·서비스 신청·모의 환경과 실제 제공 상품.
+- 첫 계약의 코드·월물·기초자산·호가 규칙·거래승수·거래일/세션·마지막 거래·정산 방식.
+- 시세·호가·체결 통보·주문 조회·잔고 대조의 TR/FID와 시각·호가 깊이·집계/누락 정보.
+- Windows COM/OCX 호환 환경·비트수·이벤트 루프·로그인·복구와 작업자 프로세스 경계.
+- 실제 조회/구독 한도와 피드 지연. 숫자를 확인하지 않은 채 구독 수·레이턴시를 약속하지 않음.
+- 매수/매도의 신규·청산 의미, 네팅 방식, 증거금·주문 예약·정산 통보의 제공 범위.
 
-Layer 1 수집 경로를 하나 선택하는 일은 Layer 0의 모든 Info Source를 먼저 확정하는 일이 아니다.
+최초 후보는 코스피200 선물 계열이다. 표준/미니 등 세부 상품·월물·수량·레버리지 수준은 이 문서에서 임의 선택하지 않는다.
 
-## Phase 1.1에서 남길 연결 검증 기록
+## 3. 바이낸스 현물의 별도 요구
 
-- 실제로 받은 raw 샘플과 정규화 필드 대응표.
-- 호가 데이터의 스냅숏/증분 여부, 깊이, 시각 정밀도, sequence·누락 검출 가능성.
-- 시세와 체결 통보 경로의 구분, 실제 체결과 주문 접수 상태의 식별 방식.
-- 관측 단위의 합성/집계 여부와 그에 따른 OFI·취소 흐름의 식별 한계.
-- 구독·호출 한도와 장애·재접속·재동기화 동작 및 환경별 차이.
-- 애플리케이션 수신·정규화 지연의 실제 측정. 문서에 적힌 속도 표현만으로 신호 유효시간을 정하지 않음.
+- 거래쌍의 base/quote 자산과 PRICE_FILTER, LOT_SIZE, MARKET_LOT_SIZE, MIN_NOTIONAL/NOTIONAL 등 적용 필터를 버전으로 관리한다.
+- 수수료를 금액 하나와 가정한 통화로 축약하지 않는다. 사용자 이벤트의 commission asset을 보존한다.
+- diff-depth를 사용할 경우 REST 스냅숏과 업데이트 ID 범위에 따라 로컬 호가를 동기화하고 누락 후 재동기화한다.
+- 공개 시세·사용자 체결·계좌 잔고 경로와 내부 모의·거래소 테스트 환경을 구별한다.
+- 실제 거래쌍·계좌 접근·제공 기능 확인 전 자동매매 지원 완료로 표시하지 않는다.
 
-## 공식 근거
+USDT와 USD의 가치를 자동으로 같게 두지 않는다. 위 현물 요건은 크립토 선물이나 무기한 계약의 추가를 의미하지 않는다.
 
-- [KIS 공식 저장소](https://github.com/koreainvestment/open-trading-api): 상품별 예제, REST/WebSocket 및 인증·환경 구분.
-- [KIS Developers](https://apiportal.koreainvestment.com/): 현재 API 명세·공지 확인 경로.
-- [키움 REST 공식 저장소](https://github.com/Kiwoom-Securities/Kiwoom-REST-API): 운영체제별 사용 안내 및 REST/WebSocket 예제.
-- [키움 REST 이용안내](https://openapi.kiwoom.com/intro/serviceInfo): 계좌·실전/모의 키·IP 등록 안내.
-- [키움 OpenAPI+ 안내](https://www.kiwoom.com/m/customer/download/VOpenApiInfoView): Windows COM 환경과 상품·이용 안내.
-- [KRX OpenAPI 서비스 목록](https://openapi.krx.co.kr/contents/OPP/INFO/service/OPPINFO004.cmd): 종목기본·일별 통계 서비스 범위.
+## 4. 공통 배포 방향
 
-이 문서의 선택 판단은 위 공식 자료를 바탕으로 한 프로젝트 설계 제안이다. 공급자의 성능 보증이나 실제 접근 확인을 의미하지 않는다.
+Windows 전용 키움 어댑터는 표준화한 메시지로 공통 엔진과 통신한다. Layer 3의 클라우드 작업이 COM 이벤트나 주문 처리를 막지 않도록 한다. Python/C#/C++ 등 연결 기술과 공통 엔진의 언어·DB·IPC는 #3의 환경 검증 후 정한다.
+
+국내 현물·선물·해외 시장·크립토의 세션과 보유시간·수신 간격을 동일하게 가정하지 않는다. 실제 피드의 스냅숏·집계·시각 정밀도에 따라 OBI·관측 OFI의 의미와 한계를 기록한다.
+
+## 5. 공식 근거
+
+- [키움 API 상품별 안내](https://www.kiwoom.com/h/customer/download/VChannelHts4View?tab=3)
+- [키움 OpenAPI+ 안내](https://www.kiwoom.com/m/customer/download/VOpenApiInfoView)
+- [키움 해외파생 OpenAPI-W 안내](https://www3.kiwoom.com/h/customer/download/VFofuopOpenApiInfoView?dummyVal=0)
+- [키움 REST 안내](https://openapi.kiwoom.com/intro/serviceInfo)
+- [Binance 공식 Spot API 문서](https://github.com/binance/binance-spot-api-docs)
+- [Binance Spot filters](https://github.com/binance/binance-spot-api-docs/blob/master/filters.md)
+- [Binance WebSocket 및 로컬 호가 동기화](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md)
+- [Binance 사용자 이벤트·commission asset](https://github.com/binance/binance-spot-api-docs/blob/master/user-data-stream.md)
+- [KIS 공식 샘플 — 대안 비교 이력](https://github.com/koreainvestment/open-trading-api)
+- [KRX 배경자료 API 목록 — Layer 0에서 별도 확정](https://openapi.krx.co.kr/contents/OPP/INFO/service/OPPINFO004.cmd)
+
+샘플·공식 문서가 있다는 사실만으로 실제 계좌 권한·모의 환경·전체 상품을 확인한 것으로 처리하지 않는다.
