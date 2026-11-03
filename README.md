@@ -2,7 +2,28 @@
 
 Research and development of a layered quantitative trading system.
 
-현재 단계는 **연구 설계**이다. 실행 코드·수집기·주문 엔진은 아직 구현하지 않았다.
+현재는 **공통 데이터 기반 구현·합성 검증 단계**다. 원천 보존·전달·시점 조회·오프라인 재생을 구현했다. 수집기·매매 전략·브로커 주문 연결은 후속 작업이다.
+
+## 실행
+
+Python **3.12 이상**, 실제 로드되는 SQLite **3.51.3 이상**이 필요하다. Python 버전만으로 SQLite 버전이 충족되지는 않는다. 실행·시험에는 외부 Python 패키지가 필요 없다. 빌드 도구의 검증 버전은 [requirements-build.lock](requirements-build.lock)에 기록했다.
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -e .
+python -m quant_system environment --probe-kiwoom
+python -m unittest discover -s tests -v
+quant-foundation demo --output-dir data/foundation-demo --config config/foundation.example.json
+quant-foundation integrity data/foundation-demo/history.db
+quant-foundation replay data/foundation-demo/manifest.json --run-id demo-replay
+```
+
+Windows PowerShell에서는 활성화 명령을 `.\.venv\Scripts\Activate.ps1`로 바꾼다. 코어와 실제 키움 OCX 어댑터의 실행 프로세스·비트수는 별도로 확인한다. `environment --probe-kiwoom`은 Windows 레지스트리 등록 정보만 확인하며 COM 활성화·로그인·이벤트 루프 성공을 의미하지 않는다.
+
+데모는 빈 출력 폴더를 요구하며 SYNTHETIC 입력만 사용한다. 원천 2건 → 메시지 2건 → ACK 유실을 흉내 낸 전달 3회 → 업무 효과 2건, 과거/최신 버전 구별, 재생·백업 파일을 생성한다. 결과 폴더는 Git에서 제외된다. 실행 DB는 같은 호스트의 로컬 디스크에 둔다.
+
+[검증 보고서](docs/foundation-verification-report.md)에 **45개 테스트**, F01~F22 대응, 설치·장애 주입·성능 측정 결과와 미검증 항목을 기록했다. Windows OCX·실제 국내 선물 피드 검증은 남아 있다.
 
 ## 거래 범위와 첫 연결
 
@@ -36,6 +57,7 @@ Layer 1·3은 seed 목록과 고정 정책으로 먼저 검증한다. Layer 2 �
 - [상품별 API·실행 환경 비교](docs/source-evaluation.md)
 - [공통 데이터 기반 설계](docs/foundation-design.md)
 - [저장·시점·재생 검증 계획](docs/foundation-validation-plan.md)
+- [구현 사용법·검증 결과](docs/foundation-verification-report.md)
 - [결정 기록](docs/decisions.md)
 - [이전 현물 중심 계약 v0.1 — 이력 보존](docs/contracts-v0.1.md)
 
@@ -45,4 +67,4 @@ Layer 1·3은 seed 목록과 고정 정책으로 먼저 검증한다. Layer 2 �
 
 - [전체 로드맵 #1](https://github.com/TheMostEvident/quant-trading-system/issues/1)
 - [범위·계약 #2 — 병합 완료](https://github.com/TheMostEvident/quant-trading-system/issues/2)
-- [공통 기반 #3 — 설계 진행·실행 구현 미착수](https://github.com/TheMostEvident/quant-trading-system/issues/3)
+- [공통 기반 #3 — 구현·합성 검증, Windows OCX 확인 잔여](https://github.com/TheMostEvident/quant-trading-system/issues/3)

@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+build/
+dist/
+data/
+runtime-data/
+*.sqlite*
+*.db
+*.db-wal
+*.db-shm
+*.writer.lock
+.env
+.env.*
+!.env.example

@@ -4,7 +4,7 @@
 
 ## 1. 상태와 범위
 
-이 문서는 원천 저장·식별·시점 조회·전달·재생을 구현할 기준이다. 현재 산출물은 설계이며 저장소 코드·DB·수집기·실행 환경을 구축했다는 의미가 아니다. Issue #3의 실제 저장·재생·장애 검증은 후속 구현 항목으로 남긴다.
+이 문서는 원천 저장·식별·시점 조회·전달·재생의 설계 기준이다. PR #31에서 설계를 병합한 뒤 사용자 요청으로 저장소·전달·조회·재생 코드를 구현했다. Linux 합성 실행의 결과와 구현 경계는 [검증 보고서](foundation-verification-report.md)를 따른다. 실제 Windows OCX·수집기·실거래 연결은 남아 있다.
 
 국내 선물을 먼저 검증하고 이후 국내 현물·해외 선물·크립토 현물에 같은 데이터 의미를 적용한다. 상품별 단위·장부·승수·증거금·정산은 계약 v0.2를 유지한다. Layer 0·2가 없어도 seed와 고정 정책, 저장된 합성 입력으로 기반을 검증할 수 있어야 한다.
 
@@ -33,23 +33,24 @@
 - 운영 백업은 SQLite가 보장하는 일관된 방식으로 생성하고 복원·무결성을 검사한다. 실행 중인 main DB 파일만 복사한 결과를 완전한 백업으로 표시하지 않는다.
 - 전원 손실·OS·디스크의 동작까지 문서만으로 보장하지 않는다. 실제 환경에서 장애·복구 시험을 통과한 프로필만 실행 가능으로 표시한다.
 
-설계 시 확인한 작업 공간은 Python 3.12.14 / SQLite 3.53.1이다. 이는 사용자 Windows·OCX 환경 확인이나 저장 엔진 구현 시험 결과가 아니다.
+구현 시험 환경은 Linux 64-bit / Python 3.12.14 / SQLite 3.53.1이다. 실제 WAL/FULL 적용·프로세스 중단·백업 복원은 시험했으며, 사용자 Windows·OCX와 물리 전원 손실은 시험하지 않았다.
 
 ## 3. 저장소 구성과 원천 크기
 
 | 예정 경로 | 책임 | 현재 상태 |
 | --- | --- | --- |
 | docs/ | 범위·계약·설계·결정·검증 계획 | 문서 작성 |
-| src/quant_system/contracts/ | 계약 검증·단위·버전 | 구현 예정 |
-| src/quant_system/foundation/ | 저널·blob·outbox·시계·시점 조회·재생 | 구현 예정 |
+| src/quant_system/contracts/ | 계약 검증·단위·버전 | v0.2.0 7종 구조·주요 불변식 검증 구현 |
+| src/quant_system/foundation/ | 저널·blob·outbox·시계·시점 조회·재생 | 로컬 SQLite 구현·Linux 합성 검증 |
 | adapters/kiwoom/ | Windows 원천 callback·연결 변환 | 실제 환경 확인 후 구현 |
-| tests/fixtures/ | 합성 raw·메시지·정정·지연·장애 사례 | 검증 계획만 정의 |
-| tests/foundation/ | 저장·재생·장애 검증 | 구현 예정 |
-| config/ | 비밀값 없는 실행 프로필 | 구현 예정 |
+| tests/fixtures/ | 계약 문서의 합성 메시지 7종 | JSON fixture 저장; 장애·지연 입력은 시험에서 생성 |
+| tests/test_foundation.py | 저장·재생·장애 검증 | unittest 45개; F01~F22 포함 |
+| config/ | 비밀값 없는 실행 프로필 | 합성 데모 한도 설정 |
+| tools/benchmark_foundation.py | 합성 저장·전달 지연 측정 | 단일 프로세스 200건 측정 |
 | research/ | 모형·정책 학습 결과 | Layer 2 연구 단계 |
 | 외부 runtime data root | DB·raw·로그·실행 결과·백업 | 사용자 환경에서 별도 생성 |
 
-프로덕션 자료·계좌정보·API 키·실행 DB·WAL을 Git에 넣지 않는다. fixture는 합성/실수집 여부와 사용 가능한 범위를 표시한다. 논리 경로만 정의하며 이번 문서 작업에서 소스 디렉터리나 실행 설정을 생성하지 않는다.
+프로덕션 자료·계좌정보·API 키·실행 DB·WAL을 Git에 넣지 않는다. 현재 fixture는 모두 합성이다. 실제 어댑터·프로세스 간 IPC transport는 후속 구현이며 현재 CaptureBuffer는 같은 프로세스의 callback/writer 경계만 제공한다.
 
 큰 BLOB·입력 폭증은 writer를 막을 수 있다. max_raw_bytes·queue item/byte 한도·batch 크기/시간·WAL/디스크 한도를 실행 프로필에 명시하고 초과를 계측한다. 값은 throughput·p95/p99 지연·손실 조건을 측정한 뒤 선택하며 이 문서가 초저지연을 보장하지 않는다.
 
@@ -173,7 +174,7 @@ identity_scope는 실제 공급자 명세에 맞춰 거래소·계좌·상품·�
 | 3-D 조회/재생 | snapshot cutoff·버전 선택·manifest·가상 시계 | [검증 계획](foundation-validation-plan.md)의 기대 결과 |
 | 3-E 복구 | 큐 포화·재시작·commit/ACK 경합·백업/복원 | 장애 주입·불변식 확인 |
 
-앞서 정한 코드 작성 보류에 따라 3-A만 이번 PR의 완료 범위다. 3-B~E와 Issue #3의 실행 검증은 미완료다. 실제 구현 없이 테스트 통과나 Issue 전체 완료로 표시하지 않는다.
+3-A 설계는 PR #31에서 병합되었다. 이후 사용자 요청으로 3-B~E의 이식 가능한 코어를 구현하고 Linux 합성 검증을 수행했다. Windows/OCX·실제 피드 확인은 미완료로 유지한다. 구현한 업무 효과는 범용 idempotency receipt이며 선물 증거금 원장·주문 엔진은 별도 작업이다. 재생은 저장된 입력·전달·상태 이력을 복원하며 미래 전략의 신호/체결 결정성을 대신 검증하지 않는다.
 
 ## 공식 근거
 
