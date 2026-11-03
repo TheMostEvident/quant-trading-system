@@ -1,0 +1,386 @@
+[
+  {
+    "schema_version": "0.2.0",
+    "message_type": "MarketSnapshot",
+    "message_id": "m-fut-101",
+    "run_id": "demo-fut-20261104",
+    "instrument_id": "SIM:KR-FUT1",
+    "source": "future-fixture",
+    "source_event_id": "book-101",
+    "event_at": "2026-11-04T00:00:01.000000Z",
+    "received_at": "2026-11-04T00:00:01.008000Z",
+    "ready_at": "2026-11-04T00:00:01.010000Z",
+    "data_origin": "SYNTHETIC",
+    "quality_flags": [],
+    "lineage": [
+      "raw-book-101"
+    ],
+    "payload": {
+      "instrument_spec_ref": "spec-fut-v1",
+      "trading_date": "2026-11-04",
+      "update_kind": "BOOK",
+      "market_status": "CONTINUOUS",
+      "book": {
+        "coverage": "TOP_N_SNAPSHOT",
+        "sync_status": "SYNCED",
+        "source_sequence": null,
+        "bids": [
+          {
+            "price": "100.9",
+            "quantity": "8"
+          }
+        ],
+        "asks": [
+          {
+            "price": "101.0",
+            "quantity": "2"
+          }
+        ]
+      },
+      "trade": null,
+      "features": {
+        "feature_version": "fut-obi-v1",
+        "time_basis": "RECEIVE_MONOTONIC",
+        "basis": [
+          "raw-book-101"
+        ],
+        "obi": 0.6,
+        "smooth_obi": 0.6,
+        "obi_slope_per_second": null,
+        "ofi_top1_delta": null,
+        "ofi_window_sum": null,
+        "ofi_window_ms": 1000
+      }
+    }
+  },
+  {
+    "schema_version": "0.2.0",
+    "message_type": "ExecutionReport",
+    "message_id": "e-fut-1",
+    "run_id": "demo-fut-20261104",
+    "instrument_id": "SIM:KR-FUT1",
+    "source": "internal-paper-future",
+    "source_event_id": "fill-1",
+    "event_at": "2026-11-04T00:00:01.300000Z",
+    "received_at": "2026-11-04T00:00:01.311000Z",
+    "ready_at": "2026-11-04T00:00:01.312000Z",
+    "data_origin": "SYNTHETIC",
+    "quality_flags": [],
+    "lineage": [
+      "intent-1",
+      "raw-book-104"
+    ],
+    "payload": {
+      "account_id": "paper-fut",
+      "client_order_id": "order-1",
+      "broker_order_id": "paper-order-1",
+      "event_type": "FILL",
+      "order_status": "FILLED",
+      "side": "BUY",
+      "position_effect": "OPEN",
+      "order_qty": "2",
+      "cum_filled_qty": "2",
+      "leaves_qty": "0",
+      "last_fill": {
+        "fill_id": "fill-1",
+        "quantity": "2",
+        "price": "101.0",
+        "charges": [
+          {
+            "kind": "FEE",
+            "asset": "KRW",
+            "amount": "40"
+          }
+        ]
+      },
+      "correction_of": null,
+      "reason": null
+    }
+  },
+  {
+    "schema_version": "0.2.0",
+    "message_type": "AccountState",
+    "message_id": "a-fut-2",
+    "run_id": "demo-fut-20261104",
+    "instrument_id": null,
+    "source": "paper-futures-ledger",
+    "source_event_id": null,
+    "event_at": "2026-11-04T00:00:01.400000Z",
+    "received_at": "2026-11-04T00:00:01.410000Z",
+    "ready_at": "2026-11-04T00:00:01.414000Z",
+    "data_origin": "SYNTHETIC",
+    "quality_flags": [],
+    "lineage": [
+      "e-fut-1",
+      "raw-book-105"
+    ],
+    "payload": {
+      "account_id": "paper-fut",
+      "account_version": 2,
+      "ledger_model": "FUTURES_MARGIN",
+      "balances": [
+        {
+          "asset": "KRW",
+          "wallet": "999960",
+          "free": "959960",
+          "locked": "40000"
+        }
+      ],
+      "margin": {
+        "asset": "KRW",
+        "initial_used": "40000",
+        "maintenance_required": "30000",
+        "order_reserved": "0",
+        "available_margin": "961960",
+        "rule_ref": "synthetic-margin-v1",
+        "status": "NORMAL"
+      },
+      "valuation": {
+        "equity": "1001960",
+        "asset": "KRW",
+        "as_of": "2026-11-04T00:00:01.400000Z",
+        "model_ref": "synthetic-linear-v1",
+        "fx_refs": []
+      },
+      "unsettled_pnl": [
+        {
+          "asset": "KRW",
+          "amount": "2000"
+        }
+      ],
+      "adjustments": [
+        "charge-fill-1"
+      ],
+      "reconciliation": "INTERNAL_ONLY"
+    }
+  },
+  {
+    "schema_version": "0.2.0",
+    "message_type": "PositionState",
+    "message_id": "p-fut-2",
+    "run_id": "demo-fut-20261104",
+    "instrument_id": "SIM:KR-FUT1",
+    "source": "paper-futures-ledger",
+    "source_event_id": null,
+    "event_at": "2026-11-04T00:00:01.400000Z",
+    "received_at": "2026-11-04T00:00:01.410000Z",
+    "ready_at": "2026-11-04T00:00:01.415000Z",
+    "data_origin": "SYNTHETIC",
+    "quality_flags": [],
+    "lineage": [
+      "e-fut-1",
+      "a-fut-2",
+      "raw-book-105"
+    ],
+    "payload": {
+      "account_id": "paper-fut",
+      "account_state_ref": "a-fut-2",
+      "position_version": 2,
+      "instrument_spec_ref": "spec-fut-v1",
+      "position_status": "OPEN",
+      "position_mode": "NET",
+      "net_qty": "2",
+      "quantity_unit": "CONTRACT",
+      "avg_entry_price": "101.0",
+      "pnl_reference_price": "101.0",
+      "mark_price": "102.0",
+      "contract_multiplier": "1000",
+      "pnl_asset": "KRW",
+      "reserved_buy_qty": "0",
+      "reserved_sell_qty": "0",
+      "active_orders": [],
+      "unrealized_pnl_gross": "2000",
+      "charges_paid": [
+        {
+          "kind": "FEE",
+          "asset": "KRW",
+          "amount": "40"
+        }
+      ],
+      "settlement_ref": "initial-basis-v1",
+      "reconciliation": "INTERNAL_ONLY"
+    }
+  },
+  {
+    "schema_version": "0.2.0",
+    "message_type": "EventPacket",
+    "message_id": "ev-message-1",
+    "run_id": "demo-fut-20261104",
+    "instrument_id": null,
+    "source": "event-fixture",
+    "source_event_id": "doc-1",
+    "event_at": null,
+    "received_at": "2026-11-04T00:00:00.300000Z",
+    "ready_at": "2026-11-04T00:00:00.900000Z",
+    "data_origin": "SYNTHETIC",
+    "quality_flags": [
+      "SOURCE_TIME_UNKNOWN",
+      "UNVALIDATED_MODEL"
+    ],
+    "lineage": [
+      "doc-1"
+    ],
+    "payload": {
+      "event_id": "event-1",
+      "event_revision": 1,
+      "event_type": "MACRO_ANNOUNCEMENT",
+      "status": "ACTIVE",
+      "document_ids": [
+        "doc-1"
+      ],
+      "evidence_refs": [
+        "doc-1:block-3"
+      ],
+      "published_at": null,
+      "published_date": "2026-11-04",
+      "publication_precision": "DATE",
+      "affected_targets": [
+        {
+          "instrument_id": "SIM:KR-FUT1",
+          "underlying_id": "SIM:INDEX1",
+          "mapping_ref": "underlying-map-v1",
+          "relevance_noul": {
+            "statement": "문서가 해당 기초지수와 연결된 거시 발표를 명시하는가",
+            "value": 0.8
+          },
+          "direction_probabilities": {
+            "POSITIVE": 0.7,
+            "NEGATIVE": 0.1,
+            "MIXED": 0.05,
+            "UNCLEAR": 0.15
+          },
+          "importance": {
+            "rubric_version": "importance-demo-v1",
+            "score": 1.0,
+            "legend": [
+              "LOW",
+              "MEDIUM",
+              "HIGH"
+            ]
+          }
+        }
+      ],
+      "model_id": "fixture-not-a-jev-call",
+      "prompt_version": "event-demo-v1",
+      "raw_response_ref": "response-fixture-1",
+      "supersedes": null,
+      "expires_at": "2026-11-04T00:10:00.000000Z"
+    }
+  },
+  {
+    "schema_version": "0.2.0",
+    "message_type": "UniverseSnapshot",
+    "message_id": "u-fut-1",
+    "run_id": "demo-fut-20261104",
+    "instrument_id": null,
+    "source": "manual-seed",
+    "source_event_id": null,
+    "event_at": null,
+    "received_at": "2026-11-03T23:59:00.000000Z",
+    "ready_at": "2026-11-03T23:59:00.010000Z",
+    "data_origin": "SYNTHETIC",
+    "quality_flags": [],
+    "lineage": [
+      "spec-fut-v1",
+      "underlying-map-v1"
+    ],
+    "payload": {
+      "universe_id": "seed-fut",
+      "revision": 1,
+      "source_kind": "SEED",
+      "as_of": "2026-11-03T23:59:00.000000Z",
+      "valid_from": "2026-11-03T23:59:00.010000Z",
+      "expires_at": "2026-11-04T06:30:00.000000Z",
+      "members": [
+        {
+          "instrument_id": "SIM:KR-FUT1",
+          "instrument_spec_ref": "spec-fut-v1",
+          "underlying_ref": "underlying-map-v1",
+          "reason_codes": [
+            "SYNTHETIC_DOMESTIC_FUTURE"
+          ],
+          "background_ref": null
+        }
+      ],
+      "excluded": [],
+      "coverage": "ONE_SYNTHETIC_FUTURE",
+      "rule_version": "seed-fut-v1"
+    }
+  },
+  {
+    "schema_version": "0.2.0",
+    "message_type": "TradingPolicy",
+    "message_id": "tp-fut-1",
+    "run_id": "demo-fut-20261104",
+    "instrument_id": "SIM:KR-FUT1",
+    "source": "static-policy",
+    "source_event_id": null,
+    "event_at": null,
+    "received_at": "2026-11-04T00:00:00.000000Z",
+    "ready_at": "2026-11-04T00:00:00.010000Z",
+    "data_origin": "SYNTHETIC",
+    "quality_flags": [],
+    "lineage": [
+      "u-fut-1"
+    ],
+    "payload": {
+      "policy_id": "policy-fut-1",
+      "provider_kind": "STATIC",
+      "provider_epoch": "demo-epoch-1",
+      "revision": 1,
+      "account_id": "paper-fut",
+      "instrument_spec_ref": "spec-fut-v1",
+      "universe_ref": "u-fut-1",
+      "valid_from": "2026-11-04T00:00:00.010000Z",
+      "expires_at": "2026-11-04T00:01:00.000000Z",
+      "allowed_position_directions": [
+        "LONG",
+        "SHORT"
+      ],
+      "target_position_qty": "2",
+      "entry": {
+        "obi_long": 0.6,
+        "obi_short": -0.6,
+        "slope_min_per_second": null,
+        "min_observations": 3,
+        "min_duration_ms": 200,
+        "max_observation_gap_ms": 500
+      },
+      "hold_exit": {
+        "long_hold_obi": 0.2,
+        "short_hold_obi": -0.2,
+        "max_hold_ms": 30000,
+        "exit_target_qty": "0",
+        "emergency_rule_ref": "futures-emergency-demo-v1"
+      },
+      "smoothing": {
+        "method": "TIME_EMA",
+        "tau_ms": 500
+      },
+      "execution_limits": {
+        "max_order_notional": {
+          "asset": "KRW",
+          "amount": "300000"
+        },
+        "max_position_qty": "2",
+        "max_initial_margin": {
+          "asset": "KRW",
+          "amount": "50000"
+        },
+        "max_spread_ticks": 2,
+        "max_quote_age_ms": 1000,
+        "order_ttl_ms": 1000,
+        "max_retries": 0,
+        "max_slippage_ticks": 1,
+        "price_reference_mode": "AT_INTENT_CREATION",
+        "price_reference_ref": null
+      },
+      "risk_budget_ref": "risk-fut-v1",
+      "regime": null,
+      "rationale": "PLUMBING_TEST_ONLY",
+      "input_refs": [
+        "u-fut-1"
+      ]
+    }
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "seed": 7,
+  "max_raw_bytes": 16777216,
+  "queue_max_items": 1000,
+  "queue_max_bytes": 8388608,
+  "dispatch_limit": 100,
+  "manifest_max_bytes": 67108864
+}
