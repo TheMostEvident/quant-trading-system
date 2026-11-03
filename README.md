@@ -34,6 +34,8 @@ Layer 1·3은 seed 목록과 고정 정책으로 먼저 검증한다. Layer 2 �
 - [현재 범위·구조](docs/scope.md)
 - [현재 메시지 계약 v0.2](docs/contracts-v0.2.md)
 - [상품별 API·실행 환경 비교](docs/source-evaluation.md)
+- [공통 데이터 기반 설계](docs/foundation-design.md)
+- [저장·시점·재생 검증 계획](docs/foundation-validation-plan.md)
 - [결정 기록](docs/decisions.md)
 - [이전 현물 중심 계약 v0.1 — 이력 보존](docs/contracts-v0.1.md)
 
@@ -42,4 +44,5 @@ Layer 1·3은 seed 목록과 고정 정책으로 먼저 검증한다. Layer 2 �
 ## 작업 관리
 
 - [전체 로드맵 #1](https://github.com/TheMostEvident/quant-trading-system/issues/1)
-- [범위·계약 #2](https://github.com/TheMostEvident/quant-trading-system/issues/2)
+- [범위·계약 #2 — 병합 완료](https://github.com/TheMostEvident/quant-trading-system/issues/2)
+- [공통 기반 #3 — 설계 진행·실행 구현 미착수](https://github.com/TheMostEvident/quant-trading-system/issues/3)

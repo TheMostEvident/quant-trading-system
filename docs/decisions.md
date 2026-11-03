@@ -46,3 +46,19 @@
 - 구버전을 묵시적으로 새 상품에 적용하지 않는다. 변환 시 누락 항목을 확인하고 지원 불가 기능은 차단한다.
 - 상품별 원장 규칙과 원천 메시지를 보존한다. 공급자 필드·COM 핸들을 공통 계약에 직접 노출하지 않는다.
 - 사용자 목표와 API 경로 선택이 반영되었으므로 PR은 검토 가능한 설계로 전환한다. 병합과 실제 코드 작성은 별도 작업이다.
+
+## Issue #3 공통 기반 설계 (2026-11-04)
+
+PR #30과 Issue #2의 범위·계약은 main에 병합되었다. 다음은 Issue #3의 설계 선택이며 실행 코드 작성·환경 구축·장애 검증은 미완료다.
+
+| ID | 선택 | 상태·근거 |
+| --- | --- | --- |
+| D-013 | 초기 로컬 SQLite BLOB + append-only journal, 단일 writer | 설계 선택; 동일 DB 트랜잭션으로 raw·메시지·outbox 일관성 단순화 |
+| D-014 | WAL + synchronous=FULL, SQLite 3.51.3 이상 | 공식 조건에 따른 초기 프로필; 실제 설치·설정·복구 검증 필요 |
+| D-015 | 코어 CPython 3.12 계열과 Windows COM bridge의 프로세스 분리 | 코어 후보 선정; bridge 비트수·호환 기술은 실제 OCX 확인 후 결정 |
+| D-016 | hash는 바이트 식별, 논리 중복은 확인된 source identity scope | 동일 호가 내용의 정상 반복과 같은 사건의 재전송 구별 |
+| D-017 | 소비자 시점 조회는 t + 커밋 watermark W + 전달 cursor D | source event time·최신 projection만으로 과거 상태 구성 금지 |
+| D-018 | 재생 manifest·가상 시계·저장된 AI 응답 사용 | 같은 입력 trace 재현; 새로운 외부 응답·실계좌 주문 배제 |
+| D-019 | Issue #3은 설계 3-A와 구현 3-B~E를 구분 | 기존 코드 보류 준수; 문서 PR만으로 전체 Issue 종료하지 않음 |
+
+상세 규칙은 [공통 기반 설계](foundation-design.md), 기대 결과와 구현 후 검증은 [검증 계획](foundation-validation-plan.md)을 따른다.
