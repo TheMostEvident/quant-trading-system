@@ -13,7 +13,7 @@ from quant_system.foundation.errors import ValidationError
 from quant_system.foundation.replay import ReplaySession, build_manifest, referenced_ids
 from quant_system.foundation.store import JournalStore
 from quant_system.foundation.values import decode, encode, timestamp, utc_us
-from quant_system.market.bridge import BridgeController, QtPort
+from quant_system.market.bridge import BridgeController, BridgeFailure, QtPort, _record_failure
 from quant_system.market.cli import ingest_file
 from quant_system.market.feed import MarketFeed, validate_frame
 from quant_system.market.mapping import BOOK_TYPE, STATUS_TYPE, TRADE_TYPE
@@ -409,6 +409,9 @@ class BridgeTests(unittest.TestCase):
         port, sink = FakePort(), Sink()
         bridge = BridgeController(port, sink, ["101TEST0"], epoch="epoch", clock=lambda: (at(0), 0))
         bridge.login(); bridge.on_connect(0)
+        self.assertTrue(bridge.mock_confirmed)
+        self.assertTrue(bridge.registration_confirmed)
+        self.assertEqual(bridge.login_error_code, 0)
         frame = bridge.on_real("101TEST0", TRADE_TYPE, " raw callback ")
         validate_frame(frame)
         self.assertEqual(frame["event"]["fields"]["10"], " +101.0 ")
@@ -480,6 +483,81 @@ class BridgeTests(unittest.TestCase):
             self.assertFalse(result["healthy"])
             self.assertEqual(result["fsynced"], 0)
             self.assertEqual(result["error"], "CALLBACK_SPOOL_IO_FAILURE")
+
+    def test_M39_registration_failure_does_not_erase_confirmed_mock_login(self):
+        port, sink = FakePort(), Sink()
+        bridge = BridgeController(port, sink, ["101TEST0"])
+        failure = BridgeFailure({"stage": "MARKET_REGISTRATION", "return_value": -200})
+        with patch.object(port, "register", side_effect=failure):
+            with self.assertRaises(BridgeFailure):
+                bridge.on_connect(0)
+        self.assertTrue(bridge.mock_confirmed)
+        self.assertEqual(bridge.login_error_code, 0)
+        self.assertFalse(bridge.registration_confirmed)
+        self.assertFalse(bridge.connected)
+        self.assertEqual(sink.frames[-1]["event"], {"kind": "CONNECTION", "connected": True, "server": "MOCK", "error_code": 0})
+
+    def registration_port(self, returns):
+        class Control:
+            def __init__(self):
+                self.results, self.calls = iter(returns), []
+            def dynamicCall(self, name, *args):
+                self.calls.append((name, args))
+                return next(self.results)
+        return QtPort(Control())
+
+    def test_M40_market_registration_failure_reports_code_and_stops(self):
+        port = self.registration_port([-200])
+        with self.assertRaises(BridgeFailure) as caught:
+            port.register(["101TEST0"], [10, 15, 20])
+        self.assertEqual(len(port.control.calls), 1)
+        self.assertEqual(caught.exception.details, {"stage": "MARKET_REGISTRATION", "api_method": "SetRealReg", "screen": "9000", "return_value": -200, "return_type": "int"})
+        self.assertEqual(port.registration_results, [caught.exception.details])
+
+    def test_M41_session_registration_failure_preserves_first_success(self):
+        port = self.registration_port([0, -300])
+        with self.assertRaises(BridgeFailure) as caught:
+            port.register(["101TEST0"], [10, 15, 20])
+        self.assertEqual(len(port.control.calls), 2)
+        self.assertEqual(port.registration_results[0]["return_value"], 0)
+        self.assertEqual(caught.exception.details["stage"], "SESSION_REGISTRATION")
+        self.assertEqual(caught.exception.details["screen"], "9001")
+        self.assertEqual(caught.exception.details["return_value"], -300)
+
+    def test_M42_missing_com_return_is_not_converted_to_success(self):
+        port = self.registration_port([None])
+        with self.assertRaises(BridgeFailure) as caught:
+            port.register(["101TEST0"], [10])
+        self.assertIsNone(caught.exception.details["return_value"])
+        self.assertEqual(caught.exception.details["return_type"], "NoneType")
+        self.assertEqual(len(port.control.calls), 1)
+
+    def test_M43_diagnostics_do_not_leak_exception_text_or_replace_first_failure(self):
+        private = "private-credential-must-not-appear"
+        port = self.registration_port([private])
+        with self.assertRaises(BridgeFailure) as caught:
+            port.register(["101TEST0"], [10])
+        report = {"error": None}
+        _record_failure(report, caught.exception, "LOGIN_AND_REGISTER")
+        _record_failure(report, RuntimeError(private), "SHUTDOWN")
+        self.assertEqual(report["error_details"]["stage"], "MARKET_REGISTRATION")
+        self.assertIsNone(report["error_details"]["return_value"])
+        self.assertEqual(report["error_details"]["return_type"], "str")
+        self.assertEqual(report["secondary_errors"][0]["error_details"], {"stage": "SHUTDOWN"})
+        self.assertNotIn(private, json.dumps(report))
+        self.assertNotIn(private, json.dumps(port.registration_results))
+
+    def test_M44_failed_login_has_its_own_code_and_cannot_register(self):
+        port, sink = FakePort(), Sink()
+        bridge = BridgeController(port, sink, ["101TEST0"])
+        with self.assertRaises(BridgeFailure) as caught:
+            bridge.on_connect(-100)
+        self.assertFalse(bridge.mock_confirmed)
+        self.assertFalse(bridge.registration_confirmed)
+        self.assertEqual(bridge.login_error_code, -100)
+        self.assertEqual(caught.exception.details["stage"], "MOCK_LOGIN")
+        self.assertEqual(caught.exception.details["return_value"], -100)
+        self.assertEqual(port.calls, [])
 
 
 if __name__ == "__main__":

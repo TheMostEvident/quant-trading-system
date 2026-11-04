@@ -85,6 +85,21 @@ $FutureCode = "KOA_STUDIO_CONFIRMED_CODE"
 
 probe는 OCX 실제 생성과 GUI timer 실행만 확인하며 로그인하지 않는다. 수집 명령은 사용자가 공식 창에서 로그인하고 모의 서버 여부가 확인된 경우에만 시세 구독을 시도한다. 반환 보고서에 모의 확인·type별 callback 건수·spool fsync/drop/high-water/지연을 남긴다. 필요한 type을 받지 못하면 INCOMPLETE_COLLECTION으로 종료한다. `real_feed_verified=false`는 현장 대조가 아직 별도라는 의미다. OBSERVED는 실제 callback 수신 출처를 뜻하며 모의 시세와 거래소 실거래의 일치 보증이 아니다.
 
+수집 실패 시 `error_details.stage`로 `MOCK_LOGIN`, `MARKET_REGISTRATION`(화면 9000), `SESSION_REGISTRATION`(화면 9001)을 구분한다. 등록 실패에는 `api_method`, `screen`, `return_value`, `return_type`을 기록하며, 앞서 성공한 등록 결과도 `registration_results`에 보존한다. `None` 등의 미확인 반환값을 성공으로 바꾸지 않는다. 임의 예외 메시지나 예상하지 않은 COM 문자열은 출력하지 않는다.
+
+`mock_login_confirmed`와 `login_error_code`는 로그인 자체의 결과다. 모의 로그인이 확인된 뒤 등록이 실패해도 로그인 성공 사실을 지우지 않는다. `registration_confirmed`는 두 등록 호출이 모두 성공했을 때만 true다. 이 값이 true여도 callback 수신과 실제 세션/FID 적합성 검증이 완료된 것은 아니다. 종료 중 추가 오류가 발생하면 최초 오류를 유지하고 `secondary_errors`에 별도로 기록한다.
+
+이전 버전이 `RuntimeError`만 보고한 경우에는 같은 PowerShell 창에서 수집 파일의 연결 이벤트를 확인한다. 이는 등록 API의 반환값을 복구하지는 않지만, 로그인과 수집 등록의 실패를 구분하는 근거가 된다.
+
+```powershell
+Get-Content -LiteralPath $CapturePath -Encoding UTF8 | ForEach-Object {
+    $Frame = $_ | ConvertFrom-Json
+    if ($Frame.event.kind -eq "CONNECTION") {
+        $Frame.event | ConvertTo-Json -Compress
+    }
+}
+```
+
 4. `config/kiwoom.observed.example.json`을 복사해 공개 상품 코드·instrument ID·거래일·상품 규칙을 채운다. 검증 증거가 생긴 항목만 spec_verified/session_mapping_verified를 true로 바꾼다. 미확인 프로필로도 수신/보존할 수 있지만 market_status는 UNKNOWN이며 이용 불가다.
 5. 별도의 core 터미널에서 수집 중인 파일을 따라 읽는다.
 

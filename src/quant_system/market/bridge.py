@@ -18,6 +18,29 @@ from .mapping import FIDS, STATUS_TYPE
 from .spool import CallbackSpool
 
 
+def _api_result(stage, method, value):
+    # Return codes and the server-kind flag are safe; never stringify an
+    # unexpected COM object or include arbitrary exception messages.
+    safe = type(value) in (int, bool) or value is None or (type(value) is str and value in ("", "0", "1"))
+    return {"stage": stage, "api_method": method,
+            "return_value": value if safe else None, "return_type": type(value).__name__}
+
+
+class BridgeFailure(RuntimeError):
+    def __init__(self, details):
+        self.details = dict(details)
+        super().__init__("Bridge operation did not confirm success")
+
+
+def _record_failure(report, error, stage):
+    failure = {"error": type(error).__name__,
+               "error_details": dict(error.details) if isinstance(error, BridgeFailure) else {"stage": stage}}
+    if report.get("error") is None:
+        report.update(failure)
+    else:
+        report.setdefault("secondary_errors", []).append(failure)
+
+
 class BridgeController:
     def __init__(self, port, sink, codes, *, producer_id="kiwoom-ocx", epoch=None, clock=None):
         if not codes or len(codes) > 10 or len(set(codes)) != len(codes) or any(not isinstance(c, str) or not c or not c.isascii() or not c.isalnum() for c in codes):
@@ -28,6 +51,8 @@ class BridgeController:
         self.sequence = 0
         self.connected = False
         self.mock_confirmed = False
+        self.login_error_code = None
+        self.registration_confirmed = False
         self.real_counts = {name: 0 for name in FIDS}
 
     def _send(self, event, stamp=None):
@@ -47,14 +72,18 @@ class BridgeController:
 
     def on_connect(self, error):
         self.connected = False
+        self.registration_confirmed = False
+        self.login_error_code = int(error)
         # Read only the server flag, never account lists, user IDs or balances.
-        mock = error == 0 and self.port.server_kind() == "1"
+        server_kind = self.port.server_kind() if error == 0 else None
+        mock = error == 0 and server_kind == "1"
+        self.mock_confirmed = mock
         self._send({"kind": "CONNECTION", "connected": mock, "server": "MOCK" if mock else "UNKNOWN", "error_code": int(error) if error else (0 if mock else -1)})
         if not mock:
-            raise RuntimeError("Mock login was not confirmed")
+            raise BridgeFailure(_api_result("MOCK_LOGIN", "OnEventConnect" if error else "KOA_Functions:GetServerGubun", error if error else server_kind))
         self.port.register(self.codes, sorted(set(fid for fields in FIDS.values() for fid in fields)))
         self.connected = True
-        self.mock_confirmed = True
+        self.registration_confirmed = True
 
     def on_real(self, code, real_type, raw_real_data):
         stamp = self.clock()  # Taken before GetCommRealData field extraction.
@@ -76,6 +105,7 @@ class BridgeController:
 class QtPort:
     def __init__(self, control):
         self.control = control
+        self.registration_results = []
 
     def login(self):
         return self.control.dynamicCall("CommConnect()")
@@ -84,12 +114,16 @@ class QtPort:
         return str(self.control.dynamicCall("KOA_Functions(QString, QString)", "GetServerGubun", ""))
 
     def register(self, codes, fids):
-        result = self.control.dynamicCall("SetRealReg(QString, QString, QString, QString)", "9000", ";".join(codes), ";".join(map(str, fids)), "0")
-        if result != 0:
-            raise RuntimeError("Real-time registration failed")
-        result = self.control.dynamicCall("SetRealReg(QString, QString, QString, QString)", "9001", "", "215", "0")
-        if result != 0:
-            raise RuntimeError("Session registration failed")
+        for stage, screen, code_list, fid_list in (
+            ("MARKET_REGISTRATION", "9000", ";".join(codes), ";".join(map(str, fids))),
+            ("SESSION_REGISTRATION", "9001", "", "215"),
+        ):
+            result = self.control.dynamicCall("SetRealReg(QString, QString, QString, QString)", screen, code_list, fid_list, "0")
+            details = _api_result(stage, "SetRealReg", result)
+            details["screen"] = screen
+            self.registration_results.append(details)
+            if result != 0:
+                raise BridgeFailure(details)
 
     def real(self, code, fid):
         return self.control.dynamicCall("GetCommRealData(QString, int)", code, fid)
@@ -115,7 +149,7 @@ def main(argv=None):
         parser.error("OCX collection requires Windows; use synthetic ingestion elsewhere")
     report = {"os": platform.system(), "python": platform.python_version(), "process_bits": struct.calcsize("P") * 8,
               "com_created": False, "gui_loop_reached": False, "login_attempted": not args.probe,
-              "real_feed_verified": False, "error": None}
+              "real_feed_verified": False, "error": None, "error_details": None}
     try:
         # Optional Windows-only dependency, outside the stdlib-only core install.
         from PyQt5.QAxContainer import QAxWidget
@@ -127,18 +161,24 @@ def main(argv=None):
             raise RuntimeError("OCX creation failed")
         report["com_created"] = True
     except Exception as exc:
-        report["error"] = type(exc).__name__
+        _record_failure(report, exc, "OCX_INITIALIZE")
         print(json.dumps(report, sort_keys=True))
         return 1
-    spool = None if args.probe else CallbackSpool(args.output)
+    try:
+        spool = None if args.probe else CallbackSpool(args.output)
+    except Exception as exc:
+        _record_failure(report, exc, "SPOOL_INITIALIZE")
+        control.clear()
+        print(json.dumps(report, sort_keys=True))
+        return 1
     port = QtPort(control)
 
-    def guarded(callback):
+    def guarded(callback, stage):
         def call(*values):
             try:
                 return callback(*values)
             except Exception as exc:
-                report["error"] = type(exc).__name__
+                _record_failure(report, exc, stage)
                 app.exit(1)
         return call
 
@@ -151,31 +191,43 @@ def main(argv=None):
         QTimer.singleShot(100, app.quit)
     else:
         bridge = BridgeController(port, spool, args.codes)
-        control.OnEventConnect.connect(guarded(bridge.on_connect))
-        control.OnReceiveRealData.connect(guarded(bridge.on_real))
-        timer.timeout.connect(guarded(bridge.heartbeat))
+        control.OnEventConnect.connect(guarded(bridge.on_connect, "LOGIN_AND_REGISTER"))
+        control.OnReceiveRealData.connect(guarded(bridge.on_real, "COPY_MARKET_FIELDS"))
+        timer.timeout.connect(guarded(bridge.heartbeat, "HEARTBEAT"))
         timer.start(500)
-        QTimer.singleShot(0, guarded(bridge.login))
+        QTimer.singleShot(0, guarded(bridge.login, "LOGIN_REQUEST"))
         QTimer.singleShot(args.seconds * 1000, app.quit)
     try:
         result = app.exec_()
     except KeyboardInterrupt:
         result = 130
-        report["error"] = "INTERRUPTED"
+        if report["error"] is None:
+            report.update(error="INTERRUPTED", error_details={"stage": "EVENT_LOOP"})
+        else:
+            _record_failure(report, KeyboardInterrupt(), "EVENT_LOOP")
     timer.stop()
     if spool:
         try:
             port.close()
             bridge._send({"kind": "CONNECTION", "connected": False, "server": "UNKNOWN", "error_code": 0})
         except Exception as exc:
-            report["error"] = type(exc).__name__
+            _record_failure(report, exc, "SHUTDOWN")
             result = 1
         finally:
-            report["transport"] = spool.close()
+            try:
+                report["transport"] = spool.close()
+            except Exception as exc:
+                _record_failure(report, exc, "TRANSPORT_CLOSE")
+                report["transport"] = {"healthy": False}
+                result = 1
         report["mock_login_confirmed"] = bridge.mock_confirmed
+        report["login_error_code"] = bridge.login_error_code
+        report["registration_confirmed"] = bridge.registration_confirmed
+        report["registration_results"] = port.registration_results
         report["real_callback_counts"] = bridge.real_counts
         if not bridge.mock_confirmed or not all(bridge.real_counts.values()):
-            report["error"] = report["error"] or "INCOMPLETE_COLLECTION"
+            if report["error"] is None:
+                report.update(error="INCOMPLETE_COLLECTION", error_details={"stage": "CALLBACK_REQUIREMENTS"})
             result = result or 2
         if not report["transport"]["healthy"]:
             result = 1
