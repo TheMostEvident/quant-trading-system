@@ -21,7 +21,7 @@ from quant_system.foundation.replay import ReplaySession, VirtualClock, build_ma
 from quant_system.foundation.store import JournalStore
 from quant_system.foundation.values import decode, digest, encode, timestamp, utc_us
 
-FIXTURES = json.loads((Path(__file__).parent / "fixtures/contracts-v0.2.json").read_text())
+FIXTURES = json.loads((Path(__file__).parent / "fixtures/contracts-v0.2.json").read_text(encoding="utf-8"))
 BASE = utc_us("2026-11-04T00:00:00.000000Z")
 
 
