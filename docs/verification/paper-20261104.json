@@ -1,0 +1,17 @@
+{
+  "scope": "Synthetic linear futures execution only; independent development proceeds while field acceptance stays in Extra Issues",
+  "base_commit": "70da066b00aa3c639867f5a49d9ef188fb33187d",
+  "base_tree": "ed93b7f59f56ef018f12e0938ab818d463f51129",
+  "baseline_blob_comparison": {"files": 88, "mismatches": 0},
+  "environment": {"os": "Linux", "process_bits": 64, "python": "3.12.14", "sqlite": "3.53.1"},
+  "source_tests": {"command": "PYTHONPATH=src python -m unittest discover -s tests -q", "discovered": 343, "passed": 343, "skipped": 0, "seconds": 9.895},
+  "installed_tests": {"command": "env -u PYTHONPATH <isolated-venv>/bin/python -m unittest discover -s tests -q", "discovered": 343, "passed": 343, "skipped": 0, "seconds": 9.316, "note": "Core imports installed wheel; source fixtures and standalone collector wrapper remain test inputs"},
+  "new_tests": 31,
+  "build": {"setuptools": "84.2.1", "wheel": "0.48.0", "offline_build_and_install": true, "wheel_sha256": "f9091d2d7bce3283049310911af1090269bb421f377a969cd1e21b3dd3f1a6fd", "installed_python_modules_byte_matched": 41, "pip_check": "PASS"},
+  "source_set": {"files": 53, "sha256": "4ec03fc4181d0137c696c422f4674bc36b07c5d93ec7bfbaf6a21bc53a837d52", "algorithm": "SHA256(concat(sorted relative *.py path UTF8, NUL, SHA256(file bytes))); excludes .git, build, __pycache__"},
+  "installed_cli": {"paper_scenario": "PASS", "database_integrity": "PASS", "manifest_delivery_replay": "PASS", "saved_input_rerun_hashes_equal": true},
+  "hand_expected_scenario": {"inputs": 15, "generated_fills": 4, "reports_delivered": 7, "pending_reports": 0, "pending_command_arrivals": 0, "net_contracts": "-2", "KRW_cash": "1003880", "KRW_equity": "1005880", "faults": [], "broker_network_calls": 0, "trace_sha256": "83f7e18adf5aef2e894f5e8ebbc23bceb368e93478e30656d5d3d0bfc0ac8ac9", "state_sha256": "6b5da21e46f95fb63129cde389a7f162259827afb9a54190f4ded498c8aa4a3b", "paper_state_sha256": "c1e64783b1d0087b37790afe3f82d728a730a5293196f677fde3dad8de273b7a"},
+  "limitations": ["Windows execution of this revision pending", "Actual futures source and environment remain in Extra Issue 1 (#33)", "Actual instrument, cost, latency and liquidity assumption acceptance remain in Extra Issue 2 (#43)", "Per-price session high-water understates replenishment; queue position unobserved", "No live broker, observed replay/shadow binding, account reconciliation provider or cash-market matching model", "Crash-resume of matching projection unsupported; replay saved inputs into a new empty output"],
+  "field_acceptance": "PENDING",
+  "profitability_claim": false
+}

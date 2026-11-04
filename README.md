@@ -109,6 +109,7 @@ Layer 1·3은 seed 목록과 고정 정책으로 먼저 검증한다. Layer 2 �
 - [구현 사용법·검증 결과](docs/foundation-verification-report.md)
 - [국내 선물 수집 경로·Windows 실행·검증 결과](docs/kiwoom-feed.md)
 - [Extra Issue 1: 초기 TR 진단·프로필·실제 저장/재생·중단/재시작 절차](docs/windows-field-validation.md)
+- [Issue #8: 지연·유동성·비용을 반영한 내부 모의 집행](docs/paper-execution.md)
 - [OBI·OFI·EMA·시간 변화율·손계산·재계산 검증](docs/microstructure-features.md)
 - [결정 기록](docs/decisions.md)
 - [이전 현물 중심 계약 v0.1 — 이력 보존](docs/contracts-v0.1.md)

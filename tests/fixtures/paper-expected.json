@@ -1,0 +1,16 @@
+{
+  "data_origin": "SYNTHETIC",
+  "broker_network_calls": 0,
+  "generated_fills": 4,
+  "reports_delivered": 7,
+  "pending_reports": 0,
+  "pending_command_arrivals": 0,
+  "positions": {
+    "SIM:KR-FUT1": "-2"
+  },
+  "balances": {
+    "KRW": "1003880"
+  },
+  "faults": [],
+  "field_validation": "PENDING_EXTRA_ISSUE_2_43"
+}
