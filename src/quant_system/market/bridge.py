@@ -5,6 +5,7 @@ the selected futures registration method require Extra Issue 1 (#33).
 """
 
 import argparse
+import hashlib
 import json
 import os
 import platform
@@ -13,9 +14,11 @@ import sys
 import time
 import uuid
 from datetime import datetime, timezone
+from pathlib import Path
 
 from .mapping import FIDS, STATUS_TYPE
 from .spool import CallbackSpool
+from .diagnostics import EventObservation, INITIAL_FIELDS, INITIAL_RQ, INITIAL_SCREEN, INITIAL_TR, collection_diagnosis
 
 
 def _api_result(stage, method, value):
@@ -41,10 +44,29 @@ def _record_failure(report, error, stage):
         report.setdefault("secondary_errors", []).append(failure)
 
 
+def _finish_report(report, destination, result):
+    report["report_version"] = 1
+    report["finished_at"] = datetime.now(timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z")
+    if destination:
+        try:
+            target = Path(destination)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with target.open("x", encoding="utf-8") as output:
+                json.dump(report, output, ensure_ascii=False, sort_keys=True)
+                output.write("\n")
+        except OSError as exc:
+            _record_failure(report, exc, "REPORT_WRITE")
+            result = 1
+    print(json.dumps(report, sort_keys=True))
+    return result
+
+
 class BridgeController:
-    def __init__(self, port, sink, codes, *, producer_id="kiwoom-ocx", epoch=None, clock=None):
+    def __init__(self, port, sink, codes, *, producer_id="kiwoom-ocx", epoch=None, clock=None, bootstrap_tr=False):
         if not codes or len(codes) > 10 or len(set(codes)) != len(codes) or any(not isinstance(c, str) or not c or not c.isascii() or not c.isalnum() for c in codes):
             raise ValueError("One to ten explicitly selected ASCII future codes required")
+        if type(bootstrap_tr) is not bool or (bootstrap_tr and len(codes) != 1):
+            raise ValueError("Initial TR diagnosis requires exactly one selected future")
         self.port, self.sink, self.codes = port, sink, tuple(codes)
         self.producer_id, self.epoch = producer_id, epoch or str(uuid.uuid4())
         self.clock = clock or (lambda: (datetime.now(timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z"), time.monotonic_ns()))
@@ -54,6 +76,9 @@ class BridgeController:
         self.login_error_code = None
         self.registration_confirmed = False
         self.real_counts = {name: 0 for name in FIDS}
+        self.observations = EventObservation()
+        self.initial_tr = {"enabled": bootstrap_tr, "requested": False, "response_count": 0,
+                           "request_result": None, "response": None}
 
     def _send(self, event, stamp=None):
         received_at, monotonic = stamp or self.clock()
@@ -84,10 +109,43 @@ class BridgeController:
         self.port.register(self.codes, sorted(set(fid for fields in FIDS.values() for fid in fields)))
         self.connected = True
         self.registration_confirmed = True
+        if self.initial_tr["enabled"]:
+            self.initial_tr["requested"] = True
+            try:
+                self.port.request_initial(self.codes[0])
+            finally:
+                self.initial_tr["request_result"] = self.port.initial_request_result
+
+    def on_initial_tr(self, screen, request_name, tr_code, record_name, prev_next, data_length, error_code, message, supplemental):
+        if not self.initial_tr["requested"] or (screen, request_name, tr_code.lower()) != (INITIAL_SCREEN, INITIAL_RQ, INITIAL_TR):
+            return
+        received_at, monotonic = self.clock()
+        self.initial_tr["response_count"] += 1
+        if self.initial_tr["response"] is None:
+            numeric_error = None
+            if type(error_code) is int:
+                numeric_error = error_code
+            elif isinstance(error_code, str) and len(error_code) <= 16 and error_code.lstrip("-").isdigit():
+                numeric_error = int(error_code)
+            if numeric_error not in (None, 0):
+                self.initial_tr["response"] = {"received_at": received_at, "error_code": numeric_error, "diagnostic_only": True}
+                raise BridgeFailure(_api_result("INITIAL_TR_RESPONSE", "OnReceiveTrData", numeric_error))
+            fields = self.port.initial_fields(tr_code, record_name or request_name)
+            if any(not isinstance(value, str) or len(value) > 4096 for value in fields.values()):
+                raise RuntimeError("Unexpected initial quote field representation")
+            # This can be a cached quote. It never creates a MarketSnapshot,
+            # refreshes a book, or changes the session/feature state.
+            self.initial_tr["response"] = {"received_at": received_at, "monotonic_ns": monotonic,
+                                           "error_code": numeric_error, "fields": fields, "diagnostic_only": True}
 
     def on_real(self, code, real_type, raw_real_data):
         stamp = self.clock()  # Taken before GetCommRealData field extraction.
-        if real_type not in FIDS or (real_type != STATUS_TYPE and code not in self.codes):
+        self.observations.record(real_type, tr_requested=self.initial_tr["requested"], tr_received=bool(self.initial_tr["response_count"]))
+        if real_type not in FIDS:
+            self.observations.filtered_type += 1
+            return None
+        if real_type != STATUS_TYPE and code not in self.codes:
+            self.observations.filtered_code += 1
             return None
         values = {str(fid): self.port.real(code, fid) for fid in FIDS[real_type]}
         if any(not isinstance(value, str) for value in values.values()) or not isinstance(raw_real_data, str):
@@ -106,6 +164,7 @@ class QtPort:
     def __init__(self, control):
         self.control = control
         self.registration_results = []
+        self.initial_request_result = None
 
     def login(self):
         return self.control.dynamicCall("CommConnect()")
@@ -127,11 +186,22 @@ class QtPort:
     def real(self, code, fid):
         return self.control.dynamicCall("GetCommRealData(QString, int)", code, fid)
 
+    def request_initial(self, code):
+        self.control.dynamicCall("SetInputValue(QString, QString)", "종목코드", code)
+        result = self.control.dynamicCall("CommRqData(QString, QString, int, QString)", INITIAL_RQ, INITIAL_TR, 0, INITIAL_SCREEN)
+        self.initial_request_result = _api_result("INITIAL_TR_REQUEST", "CommRqData", result)
+        if type(result) is not int or result != 0:
+            raise BridgeFailure(self.initial_request_result)
+
+    def initial_fields(self, tr_code, record_name):
+        return {field: self.control.dynamicCall("GetCommData(QString, QString, int, QString)", tr_code, record_name, 0, field)
+                for field in INITIAL_FIELDS}
+
     def connected(self):
         return self.control.dynamicCall("GetConnectState()")
 
     def close(self):
-        for screen in ("9000", "9001"):
+        for screen in ("9000", "9001", INITIAL_SCREEN):
             self.control.dynamicCall("DisconnectRealData(QString)", screen)
 
 
@@ -141,9 +211,18 @@ def main(argv=None):
     parser.add_argument("--output")
     parser.add_argument("--codes", nargs="+")
     parser.add_argument("--seconds", type=int, default=60)
+    parser.add_argument("--bootstrap-tr", action="store_true", help="Request one read-only OPT50001 quote after mock login")
+    parser.add_argument("--report", help="Save final diagnostic JSON; destination must be new")
+    parser.add_argument("--max-market-events", type=int, help="Bound the field sample; all required callback types are still checked")
     args = parser.parse_args(argv)
     if args.seconds < 1 or args.seconds > 3600 or (not args.probe and (not args.output or not args.codes)):
         parser.error("Use --probe, or --output and --codes; seconds must be 1..3600")
+    if args.bootstrap_tr and (args.probe or len(args.codes or []) != 1):
+        parser.error("--bootstrap-tr requires one --codes value and cannot be used with --probe")
+    if args.report and Path(args.report).exists():
+        parser.error("Report destination already exists")
+    if args.max_market_events is not None and not 1 <= args.max_market_events <= 100000:
+        parser.error("--max-market-events must be 1..100000")
     if os.name != "nt":
         parser.error("OCX collection requires Windows; use synthetic ingestion elsewhere")
     report = {"os": platform.system(), "python": platform.python_version(), "process_bits": struct.calcsize("P") * 8,
@@ -161,15 +240,13 @@ def main(argv=None):
         report["com_created"] = True
     except Exception as exc:
         _record_failure(report, exc, "OCX_INITIALIZE")
-        print(json.dumps(report, sort_keys=True))
-        return 1
+        return _finish_report(report, args.report, 1)
     try:
         spool = None if args.probe else CallbackSpool(args.output)
     except Exception as exc:
         _record_failure(report, exc, "SPOOL_INITIALIZE")
         control.clear()
-        print(json.dumps(report, sort_keys=True))
-        return 1
+        return _finish_report(report, args.report, 1)
     port = QtPort(control)
 
     def guarded(callback, stage):
@@ -189,9 +266,15 @@ def main(argv=None):
     if args.probe:
         QTimer.singleShot(100, app.quit)
     else:
-        bridge = BridgeController(port, spool, args.codes)
+        bridge = BridgeController(port, spool, args.codes, bootstrap_tr=args.bootstrap_tr)
         control.OnEventConnect.connect(guarded(bridge.on_connect, "LOGIN_AND_REGISTER"))
-        control.OnReceiveRealData.connect(guarded(bridge.on_real, "COPY_MARKET_FIELDS"))
+        def market_callback(*values):
+            bridge.on_real(*values)
+            if args.max_market_events is not None and sum(bridge.real_counts.values()) >= args.max_market_events:
+                app.quit()
+        control.OnReceiveRealData.connect(guarded(market_callback, "COPY_MARKET_FIELDS"))
+        if args.bootstrap_tr:
+            control.OnReceiveTrData.connect(guarded(bridge.on_initial_tr, "INITIAL_TR_RESPONSE"))
         timer.timeout.connect(guarded(bridge.heartbeat, "HEARTBEAT"))
         timer.start(500)
         QTimer.singleShot(0, guarded(bridge.login, "LOGIN_REQUEST"))
@@ -224,15 +307,25 @@ def main(argv=None):
         report["registration_confirmed"] = bridge.registration_confirmed
         report["registration_results"] = port.registration_results
         report["real_callback_counts"] = bridge.real_counts
+        report["observed_real_callbacks"] = bridge.observations.summary()
+        report["initial_tr"] = bridge.initial_tr
+        report["diagnosis"] = collection_diagnosis(mock=bridge.mock_confirmed, registered=bridge.registration_confirmed,
+                                                  observations=report["observed_real_callbacks"], accepted=bridge.real_counts, initial_tr=bridge.initial_tr)
         if not bridge.mock_confirmed or not all(bridge.real_counts.values()):
             if report["error"] is None:
                 report.update(error="INCOMPLETE_COLLECTION", error_details={"stage": "CALLBACK_REQUIREMENTS"})
             result = result or 2
         if not report["transport"]["healthy"]:
             result = 1
+        report["capture_filename"] = Path(args.output).name
+        try:
+            with Path(args.output).open("rb") as source:
+                report["capture_sha256"] = hashlib.file_digest(source, "sha256").hexdigest()
+        except OSError as exc:
+            _record_failure(report, exc, "CAPTURE_DIGEST")
+            result = 1
     control.clear()
-    print(json.dumps(report, sort_keys=True))
-    return result
+    return _finish_report(report, args.report, result)
 
 
 if __name__ == "__main__":

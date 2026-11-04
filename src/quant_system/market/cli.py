@@ -9,11 +9,13 @@ from quant_system.foundation.values import decode, encode, now_utc, timestamp, u
 from .feed import MarketFeed
 
 
-def ingest_file(input_path, database, run_id, profile, *, manifest_path=None, follow=False, seconds=60, simulate_clock=False, feature_config=None):
+def ingest_file(input_path, database, run_id, profile, *, manifest_path=None, follow=False, seconds=60, simulate_clock=False, feature_config=None, producer_finished=None):
     if type(seconds) not in (int, float) or seconds <= 0 or seconds > 3600:
         raise ValidationError("Follow duration must be 0 < seconds <= 3600")
     if simulate_clock and (profile.get("data_origin") != "SYNTHETIC" or follow):
         raise ValidationError("Virtual readiness is only allowed for explicit offline synthetic runs")
+    if producer_finished is not None and (not follow or not callable(producer_finished)):
+        raise ValidationError("Producer completion callback requires live follow mode")
     path = Path(input_path)
     health_path = Path(str(path) + ".health.json")
     if manifest_path and Path(manifest_path).exists():
@@ -82,6 +84,14 @@ def ingest_file(input_path, database, run_id, profile, *, manifest_path=None, fo
                         deliver(last_at)
                     break
                 elapsed = time.monotonic()
+                if not part and producer_finished is not None and producer_finished():
+                    if pending:
+                        feed.process(pending, framing_error=True)
+                        pending = b""
+                    last_at = now_utc()
+                    feed.tick(at=last_at, transport_failed=True)
+                    deliver(last_at)
+                    break
                 if elapsed - last_tick >= .5:
                     last_at = now_utc()
                     feed.tick(at=last_at)

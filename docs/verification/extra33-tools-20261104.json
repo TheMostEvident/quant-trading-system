@@ -1,0 +1,15 @@
+{
+  "scope": "Portable diagnostics and field-evidence tooling; synthetic/fake-port tests only, not Windows field acceptance",
+  "base_commit": "046f3ad37cd248f4d5a9177d6508d400fba82958",
+  "base_tree": "429299c639b23bfa2f00f79af5843dd423c71c12",
+  "baseline_blob_comparison": {"files": 81, "mismatches": 0},
+  "environment": {"os": "Linux", "process_bits": 64, "python": "3.12.14", "sqlite": "3.53.1"},
+  "source_tests": {"command": "PYTHONPATH=src python -m unittest discover -s tests -q", "discovered": 312, "passed": 312, "skipped": 0, "seconds": 11.472},
+  "installed_tests": {"command": "env -u PYTHONPATH <isolated-venv>/bin/python -m unittest discover -s tests -q", "discovered": 312, "passed": 312, "skipped": 0, "seconds": 10.893, "note": "Core imports installed wheel; repository fixture files and standalone collector wrapper remain test inputs"},
+  "new_tests": 23,
+  "build": {"setuptools": "84.2.1", "wheel": "0.48.0", "no_build_isolation": true, "no_index": true, "no_runtime_dependencies": true, "wheel_sha256": "b7f4364292baf31f9fd9f89e63cd2156fe8d806a47e09e484cbe7354c699168e", "installed_python_files_byte_matched": 39, "pip_check": "PASS"},
+  "source_set": {"files": 50, "sha256": "b4bcc42b29419b3b3a8ea3fce6426ea9d5ecddd15b6dcb7a655a02cefa58e9ba", "algorithm": "SHA256(concat(sorted relative *.py path UTF8, NUL, SHA256(file bytes))); excludes .git, build, __pycache__"},
+  "installed_cli_checks": {"audit_fixture_rejected_as_field_evidence": true, "profile_draft_and_review_remain_unverified": true, "linux_field_orchestration_refused_before_artifact_creation": true},
+  "field_acceptance": {"windows_execution_of_this_revision": "PENDING", "real_futures_callbacks": "PENDING", "instrument_and_futures_session_semantics": "PENDING", "observed_capture_db_replay_features": "PENDING", "observed_stop_restart_and_latency": "PENDING", "night_openapi_mock_support": "UNVERIFIED", "issue_33_closed": false, "issue_8_resumed": false},
+  "guardrails": {"initial_tr_is_diagnostic_only": true, "does_not_freshen_book": true, "requires_all_selected_real_types": true, "unverified_session_or_instrument_blocks_use": true, "no_account_or_order_calls_added": true, "fsync_and_full_durability_not_relaxed": true}
+}
