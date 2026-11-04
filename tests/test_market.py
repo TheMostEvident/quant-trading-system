@@ -381,6 +381,12 @@ class MarketTests(unittest.TestCase):
         self.assertFalse(result["healthy"])
         self.assertFalse(result["usable_instruments"]["SIM:KR-FUT1"])
 
+    def test_M45_fresh_book_without_market_status_does_not_open_input_gate(self):
+        self.connect()
+        book = self.send()[-1]
+        self.assertEqual(book["payload"]["market_status"], "UNKNOWN")
+        self.assertFalse(self.eligible())
+
 
 class FakePort:
     def __init__(self, server="1"):
@@ -412,6 +418,8 @@ class BridgeTests(unittest.TestCase):
         self.assertTrue(bridge.mock_confirmed)
         self.assertTrue(bridge.registration_confirmed)
         self.assertEqual(bridge.login_error_code, 0)
+        registration = next(call for call in port.calls if isinstance(call, tuple) and call[0] == "register")
+        self.assertIn(215, registration[2])
         frame = bridge.on_real("101TEST0", TRADE_TYPE, " raw callback ")
         validate_frame(frame)
         self.assertEqual(frame["event"]["fields"]["10"], " +101.0 ")
@@ -511,18 +519,16 @@ class BridgeTests(unittest.TestCase):
         with self.assertRaises(BridgeFailure) as caught:
             port.register(["101TEST0"], [10, 15, 20])
         self.assertEqual(len(port.control.calls), 1)
-        self.assertEqual(caught.exception.details, {"stage": "MARKET_REGISTRATION", "api_method": "SetRealReg", "screen": "9000", "return_value": -200, "return_type": "int"})
+        self.assertEqual(caught.exception.details, {"stage": "MARKET_REGISTRATION", "api_method": "SetRealReg", "screen": "9000", "registration_scope": "SELECTED_INSTRUMENTS", "return_value": -200, "return_type": "int"})
         self.assertEqual(port.registration_results, [caught.exception.details])
 
-    def test_M41_session_registration_failure_preserves_first_success(self):
-        port = self.registration_port([0, -300])
-        with self.assertRaises(BridgeFailure) as caught:
-            port.register(["101TEST0"], [10, 15, 20])
-        self.assertEqual(len(port.control.calls), 2)
+    def test_M41_selected_codes_include_status_fid_without_empty_global_request(self):
+        port = self.registration_port([0, -105])
+        port.register(["101TEST0", "101TEST1"], [10, 15, 20, 215])
+        self.assertEqual(len(port.control.calls), 1)
+        self.assertEqual(port.control.calls[0], ("SetRealReg(QString, QString, QString, QString)", ("9000", "101TEST0;101TEST1", "10;15;20;215", "0")))
         self.assertEqual(port.registration_results[0]["return_value"], 0)
-        self.assertEqual(caught.exception.details["stage"], "SESSION_REGISTRATION")
-        self.assertEqual(caught.exception.details["screen"], "9001")
-        self.assertEqual(caught.exception.details["return_value"], -300)
+        self.assertEqual(port.registration_results[0]["registration_scope"], "SELECTED_INSTRUMENTS")
 
     def test_M42_missing_com_return_is_not_converted_to_success(self):
         port = self.registration_port([None])
