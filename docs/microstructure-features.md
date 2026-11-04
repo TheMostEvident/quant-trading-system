@@ -4,6 +4,11 @@
 
 가중 OBI·관측 OFI·EMA·차분·스프레드/깊이·거래량을 계산하고 MarketSnapshot.features에 보존한다. 계산 정의는 설정 artifact에 고정한다. **125개 unittest**(기존 83 + 지표 42)로 손계산 기준·경계·시점·상태 초기화·독립 재계산을 검증했다. Windows/OCX·실제 피드의 단위/범위/수신 검증은 [#33](https://github.com/TheMostEvident/quant-trading-system/issues/33)에 남아 있다.
 
+Issue #6에서 EVENT_EMA α=1일 때 현재 OBI를 정확히 반환하도록 cancellation 오차를
+수정했다. 기존 α=1 캐시의 마지막 자리와 달라질 수 있으므로 과거 엄격 재계산에는
+원래 code/wheel을 보존한다. [고정 정책 안내](static-policy.md)의 P16 경계 회귀와
+현재 198개 시험이 이 변경을 포함한다. 기본 TIME_EMA 경로는 변경하지 않았다.
+
 ## 구현과 계약
 
 | 경로 | 책임 |

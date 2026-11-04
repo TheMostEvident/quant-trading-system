@@ -312,6 +312,19 @@ price_reference_mode는 AT_INTENT_CREATION 또는 FIXED_REFERENCE이다. 실제 
 
 예시의 수량·호가·기간·증거금은 최적 정책·실제 증권사 조건이 아니다. 재시도·비상 청산은 미체결·취소·잔여 수량을 먼저 확인하며 시장가의 즉시 체결을 보장하지 않는다.
 
+### 구현된 STATIC extension: static-obi-v1
+
+봉투 0.2.0은 유지한다. 실행 가능한 고정 정책은 payload에 `strategy_version="static-obi-v1"`,
+`feature_config_ref`, 양의 `state_max_age_ms`를 추가한다. STATIC·regime=null·exit_target_qty=0,
+명시적인 주문 명목가치 한도와 AT_INTENT_CREATION을 요구한다. 허용 방향의 진입/유지
+문턱은 null일 수 없으며 `slope_min_per_second`는 null 또는 비음수다. 기존 extension 없는
+정책은 이력 읽기/저장은 가능하지만 새 evaluator는 실행하지 않는다. FIXED_REFERENCE의
+고정 주문 앵커·재시도는 OMS 후속 범위다.
+
+결과는 input/policy/evidence 참조를 가진 오프라인 signal target이며 ExecutionReport나
+실제 PositionState가 아니다. #6의 단위·시계·외부 증거금 quote 및 현물 감소 한계는
+[고정 정책 안내](static-policy.md)를 따른다. Layer 2 provider는 이 evaluator에서 거부한다.
+
 ## 11. 필수 참조 fixture와 검증 사례
 
 위 JSON은 다음 자료가 #3 이후 실제 fixture로 작성될 것을 요구하는 설계 예시이다. 참조 객체가 이미 저장·구현되었다는 의미가 아니다.

@@ -94,3 +94,18 @@ PR #30과 Issue #2의 범위·계약, PR #31의 공통 기반 설계는 main에 
 | D-037 | replay에서 저장된 정규화 입력과 raw clock으로 독립 재계산 | producer journal order·ready cutoff·계보 검사; consumer 재전달을 다시 계산하지 않음 |
 
 공식 식의 근거·프로젝트 선택·손계산 표·125개 검증과 잔여 #33 조건은 [미시구조 지표](microstructure-features.md)를 따른다.
+
+## Issue #6 고정 정책 신호 (2026-11-04)
+
+| ID | 선택 | 근거·경계 |
+| --- | --- | --- |
+| D-038 | static-obi-v1 명시적 STATIC extension만 실행 | 기존 0.2 봉투 유지; Layer 2·예측 regime을 가장하지 않음 |
+| D-039 | 신호는 signed 총 목표이며 실제 보유를 변경하지 않음 | prepare/commit과 중복 결정 구분; OMS·체결/예약 원장은 #7 이후 |
+| D-040 | N회·원천 경과시간·유지 히스테리시스·선택적 진입 slope를 분리 | 중복/처리 지연은 지속성 증거가 아니며 slope 부호만으로 기본 청산하지 않음 |
+| D-041 | 만료 후 신규 증가를 금지하고 기존 감소·보유시간·유지 문턱을 계속 평가 | 최초 체결 기산점은 정책·주문 갱신으로 초기화하지 않음; 반전은 새 version의 flat 확인 뒤 새 streak |
+| D-042 | capability·단위·명목가치·예약·현재 상태에 묶인 증거금 quote 검사 | actual provider가 없으면 추정 진입하지 않음; 가용 증거금에서 예약을 중복 차감하지 않음 |
+| D-043 | 현물은 CASH/보유 재고 감소만 지원 | CONTRACT-only 지표를 현물로 바꾸지 않음; 신규 진입·현물 OBI 유지는 후속 |
+| D-044 | EVENT_EMA α=1의 결과를 현재 OBI로 정확히 설정 | cancellation 오차가 유지 문턱 equality를 깨는 회귀를 P16으로 검증; 과거 캐시는 원래 code와 보존 |
+| D-045 | CLI는 가용 시점이 선언된 오프라인 bundle 평가 | 실제 t/W/D 소비자 연결·시계 매핑·원장/브로커 인증은 후속; #33 실피드 검증을 대체하지 않음 |
+
+정의·경계·198개 시험과 설치 결과는 [고정 정책](static-policy.md)과 [검증 JSON](verification/policy-20261104.json)을 따른다.
