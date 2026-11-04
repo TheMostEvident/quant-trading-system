@@ -21,7 +21,7 @@ def main():
     args = parser.parse_args()
     if args.events < 1:
         parser.error("--events must be positive")
-    fixture = json.loads((Path(__file__).resolve().parents[1] / "tests/fixtures/contracts-v0.2.json").read_text())[0]
+    fixture = json.loads((Path(__file__).resolve().parents[1] / "tests/fixtures/contracts-v0.2.json").read_text(encoding="utf-8"))[0]
     base = utc_us("2026-11-04T00:00:00.000000Z")
     samples = {key: [] for key in ("enqueue_to_raw_commit", "normalize_commit", "delivery_commit", "ack_commit", "enqueue_to_delivery")}
     with tempfile.TemporaryDirectory() as directory:
