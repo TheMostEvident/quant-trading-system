@@ -2,7 +2,7 @@
 
 Research and development of a layered quantitative trading system.
 
-현재는 **공통 기반과 Layer 1 수집·지표·고정 정책 신호의 구현·합성 검증 단계**다. 키움 callback 보존·정규화·지표 계산에 이어 고정 정책의 진입·유지·청산 목표와 필터를 오프라인으로 평가한다. Windows/OCX 실제 실행·피드 검증은 [Extra Issue 1 #33](https://github.com/TheMostEvident/quant-trading-system/issues/33)에서 진행한다.
+현재는 **공통 기반과 Layer 1 수집·지표·고정 정책·OMS/원장의 구현·합성 검증 단계**다. 신호와 실제 체결을 구별하고 주문 예약·부분 체결·취소 경합·재접속 대조·합성 선물 회계를 영속 저장한다. 실제 브로커 전송과 자동 모의 체결은 아직 연결하지 않았다. Windows/OCX 실제 실행·피드 검증은 [Extra Issue 1 #33](https://github.com/TheMostEvident/quant-trading-system/issues/33)에서 진행한다.
 
 ## 실행
 
@@ -58,9 +58,21 @@ quant-foundation signal-scenario tests/fixtures/static-policy.synthetic.json --o
 quant-foundation signal-scenario data/signals/inputs.json
 ```
 
-`STATIC` 정책·N회와 경과시간·진입/유지 히스테리시스·만료·상품/계좌 capability·수량/명목가치/증거금 조건으로 signed **총 목표 수량**을 제안한다. 신호가 실제 보유를 바꾸지 않으며, 반전은 기존 포지션의 flat 확인 후 다시 평가한다. 현물은 보유 재고의 명시적 감소·청산만 지원한다. 오프라인 bundle 실행이며 실제 수집 구독·OMS/원장은 후속 범위다.
+`STATIC` 정책·N회와 경과시간·진입/유지 히스테리시스·만료·상품/계좌 capability·수량/명목가치/증거금 조건으로 signed **총 목표 수량**을 제안한다. 신호가 실제 보유를 바꾸지 않으며, 반전은 기존 포지션의 flat 확인 후 다시 평가한다. 현물은 보유 재고의 명시적 감소·청산만 지원한다. 오프라인 bundle 실행이며 실제 수집 구독·브로커 연결은 후속 범위다.
 
-[실행·입력·경계·위험·제한](docs/static-policy.md)과 [예제 정책](config/static-policy.example.json), [고정 예상 시나리오](tests/fixtures/static-policy-expected.json)를 제공한다. **현재 198개 테스트(기존 125 + 정책 73)**를 독립 설치 환경에서 검증하며 결과는 [검증 JSON](docs/verification/policy-20261104.json)에 기록한다. Layer 2 예측이나 최종 매매 파라미터 선정은 포함하지 않는다.
+[실행·입력·경계·위험·제한](docs/static-policy.md)과 [예제 정책](config/static-policy.example.json), [고정 예상 시나리오](tests/fixtures/static-policy-expected.json)를 제공한다. PR #36의 **198개 테스트(기존 125 + 정책 73)**는 [검증 JSON](docs/verification/policy-20261104.json)에 기록했다. Layer 2 예측이나 최종 매매 파라미터 선정은 포함하지 않는다.
+
+## 주문 상태·체결 원장·대조
+
+```bash
+quant-foundation oms-scenario tests/fixtures/oms.synthetic.json --output-dir data/oms-demo
+quant-foundation integrity data/oms-demo/history.db
+quant-foundation replay data/oms-demo/manifest.json --run-id oms-replay
+```
+
+실제 입력된 fill만 포지션/자산에 반영하며 취소 응답 뒤에도 지연 체결·미체결 대조 전 예약을 유지한다. command claim을 영속 기록한 뒤 반환하고 응답 불명 시 자동 재전송하지 않는다. 최초 anchor·TTL·재시도/가격 한도를 유지하며 신호 연결은 t/W/D의 최신 정책·유효 호가를 요구한다.
+
+`synthetic-fifo-v1`은 선형 선물의 수수료·실현손익·정산·미정산손익·증거금을 구별하는 **합성 시험 모델**이다. 실제 브로커 회계/증거금 규칙을 추정하지 않는다. 현물 소수 재고·자산별 비용의 장부 표현도 시험하지만 현물 진입 전략·거래소 연결은 별도다. **현재 282개 테스트(기존 198 + OMS/원장 84)**, 수작업 기준표·강제 종료·재시작·CLI·독립 설치 결과는 [OMS 안내](docs/oms-ledger.md)와 [검증 JSON](docs/verification/oms-20261104.json)을 따른다. 자동 모의 집행은 #8, 실제 환경 검증은 #33에서 이어간다.
 
 ## 거래 범위와 첫 연결
 

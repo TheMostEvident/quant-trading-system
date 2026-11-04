@@ -1,0 +1,1284 @@
+{
+  "scenario_version": "oms-scenario-v1",
+  "config": {
+    "model": "synthetic-fifo-v1",
+    "data_origin": "SYNTHETIC",
+    "ready_at": "2026-11-04T00:00:00.000000Z",
+    "run_id": "demo-fut-20261104",
+    "account_id": "paper-fut",
+    "execution_scope": "synthetic-broker/session-1",
+    "ledger_model": "FUTURES_MARGIN",
+    "valuation_asset": "KRW",
+    "balances": {
+      "KRW": "1000000"
+    },
+    "margin_rule_ref": "synthetic-margin-v1",
+    "max_gross_notional": "5000000",
+    "instruments": {
+      "SIM:KR-FUT1": {
+        "asset_class": "FUTURE",
+        "quantity_unit": "CONTRACT",
+        "price_unit": "INDEX_POINT",
+        "qty_step": "1",
+        "min_qty": "1",
+        "contract_multiplier": "1000",
+        "pnl_asset": "KRW",
+        "quote_asset": "KRW",
+        "base_asset": null,
+        "tick_size": "0.1",
+        "position_mode": "NET",
+        "pnl_model": "LINEAR",
+        "can_open_long": true,
+        "can_open_short": true,
+        "margin_rule_ref": "synthetic-margin-v1",
+        "initial_per_contract": "20000",
+        "maintenance_per_contract": "15000",
+        "instrument_spec_ref": "spec-fut-v1"
+      }
+    }
+  },
+  "events": [
+    {
+      "event_id": "event-1",
+      "kind": "TARGET",
+      "at": "2026-11-04T00:00:00.010000Z",
+      "clock": {
+        "producer_id": "oms-test",
+        "epoch": "epoch-1",
+        "monotonic_ns": 10000000
+      },
+      "instrument_id": "SIM:KR-FUT1",
+      "data": {
+        "intent_id": "intent",
+        "intent_expires_at": "2026-11-04T00:00:05.000000Z",
+        "signal": {
+          "signal_version": "static-obi-v1",
+          "decision_id": "signal-1",
+          "run_id": "demo-fut-20261104",
+          "account_id": "paper-fut",
+          "instrument_id": "SIM:KR-FUT1",
+          "provider_kind": "STATIC",
+          "as_of": "2026-11-04T00:00:00.010000Z",
+          "policy_ref": "policy-1",
+          "quote_ref": "quote-1",
+          "quantity_unit": "CONTRACT",
+          "actual_position_qty": "0",
+          "target_position_qty": "2",
+          "action": "ENTER",
+          "entry_allowed": true,
+          "input_refs": [
+            "policy-1",
+            "quote-1"
+          ]
+        },
+        "policy": {
+          "schema_version": "0.2.0",
+          "message_type": "TradingPolicy",
+          "message_id": "policy-1",
+          "run_id": "demo-fut-20261104",
+          "instrument_id": "SIM:KR-FUT1",
+          "source": "static-policy",
+          "source_event_id": null,
+          "event_at": null,
+          "received_at": "2026-11-04T00:00:00.000000Z",
+          "ready_at": "2026-11-04T00:00:00.000000Z",
+          "data_origin": "SYNTHETIC",
+          "quality_flags": [],
+          "lineage": [],
+          "payload": {
+            "policy_id": "policy-fut-1",
+            "provider_kind": "STATIC",
+            "provider_epoch": "demo-epoch-1",
+            "revision": 1,
+            "account_id": "paper-fut",
+            "instrument_spec_ref": "spec-fut-v1",
+            "universe_ref": "u-fut-1",
+            "valid_from": "2026-11-04T00:00:00.000000Z",
+            "expires_at": "2026-11-04T00:00:05.000000Z",
+            "allowed_position_directions": [
+              "LONG",
+              "SHORT"
+            ],
+            "target_position_qty": "2",
+            "entry": {
+              "obi_long": 0.6,
+              "obi_short": -0.6,
+              "slope_min_per_second": null,
+              "min_observations": 3,
+              "min_duration_ms": 200,
+              "max_observation_gap_ms": 500
+            },
+            "hold_exit": {
+              "long_hold_obi": 0.2,
+              "short_hold_obi": -0.2,
+              "max_hold_ms": 30000,
+              "exit_target_qty": "0",
+              "emergency_rule_ref": "futures-emergency-demo-v1"
+            },
+            "smoothing": {
+              "method": "TIME_EMA",
+              "tau_ms": 500
+            },
+            "execution_limits": {
+              "max_order_notional": {
+                "asset": "KRW",
+                "amount": "3000000"
+              },
+              "max_position_qty": "10",
+              "max_initial_margin": {
+                "asset": "KRW",
+                "amount": "200000"
+              },
+              "max_spread_ticks": 2,
+              "max_quote_age_ms": 1000,
+              "order_ttl_ms": 1000,
+              "max_retries": 1,
+              "max_slippage_ticks": 1,
+              "price_reference_mode": "AT_INTENT_CREATION",
+              "price_reference_ref": null
+            },
+            "risk_budget_ref": "risk-fut-v1",
+            "regime": null,
+            "rationale": "PLUMBING_TEST_ONLY",
+            "input_refs": [
+              "u-fut-1"
+            ],
+            "strategy_version": "static-obi-v1",
+            "state_max_age_ms": 5000,
+            "feature_config_ref": "feature-config"
+          }
+        },
+        "quote": {
+          "schema_version": "0.2.0",
+          "message_type": "MarketSnapshot",
+          "message_id": "quote-1",
+          "run_id": "demo-fut-20261104",
+          "instrument_id": "SIM:KR-FUT1",
+          "source": "future-fixture",
+          "source_event_id": null,
+          "event_at": null,
+          "received_at": "2026-11-04T00:00:00.010000Z",
+          "ready_at": "2026-11-04T00:00:00.010000Z",
+          "data_origin": "SYNTHETIC",
+          "quality_flags": [],
+          "lineage": [],
+          "payload": {
+            "instrument_spec_ref": "spec-fut-v1",
+            "trading_date": "2026-11-04",
+            "update_kind": "BOOK",
+            "market_status": "CONTINUOUS",
+            "book": {
+              "coverage": "TOP_N_SNAPSHOT",
+              "sync_status": "SYNCED",
+              "source_sequence": null,
+              "bids": [
+                {
+                  "price": "100.9",
+                  "quantity": "10"
+                }
+              ],
+              "asks": [
+                {
+                  "price": "101",
+                  "quantity": "10"
+                }
+              ]
+            },
+            "trade": null,
+            "features": null
+          }
+        },
+        "quote_clock": {
+          "producer_id": "oms-test",
+          "epoch": "epoch-1",
+          "monotonic_ns": 10000000
+        },
+        "seen_at": {
+          "policy-1": "2026-11-04T00:00:00.000000Z",
+          "quote-1": "2026-11-04T00:00:00.010000Z"
+        },
+        "limit_price": "101",
+        "fee_reserve": {
+          "asset": "KRW",
+          "amount": "100"
+        }
+      }
+    },
+    {
+      "event_id": "event-2",
+      "kind": "DISPATCH",
+      "at": "2026-11-04T00:00:00.020000Z",
+      "clock": {
+        "producer_id": "oms-test",
+        "epoch": "epoch-1",
+        "monotonic_ns": 20000000
+      },
+      "instrument_id": "SIM:KR-FUT1",
+      "data": {
+        "command_id": "intent:0:new:0"
+      }
+    },
+    {
+      "event_id": "event-3",
+      "kind": "REPORT",
+      "at": "2026-11-04T00:00:00.030000Z",
+      "clock": {
+        "producer_id": "oms-test",
+        "epoch": "epoch-1",
+        "monotonic_ns": 30000000
+      },
+      "instrument_id": "SIM:KR-FUT1",
+      "data": {
+        "report": {
+          "schema_version": "0.2.0",
+          "message_type": "ExecutionReport",
+          "message_id": "report-3",
+          "run_id": "demo-fut-20261104",
+          "instrument_id": "SIM:KR-FUT1",
+          "source": "internal-paper-future",
+          "source_event_id": null,
+          "event_at": null,
+          "received_at": "2026-11-04T00:00:00.030000Z",
+          "ready_at": "2026-11-04T00:00:00.030000Z",
+          "data_origin": "SYNTHETIC",
+          "quality_flags": [],
+          "lineage": [],
+          "payload": {
+            "account_id": "paper-fut",
+            "client_order_id": "intent:0",
+            "broker_order_id": "broker:intent:0",
+            "event_type": "ACK",
+            "order_status": "OPEN",
+            "side": "BUY",
+            "position_effect": "OPEN",
+            "order_qty": "2",
+            "cum_filled_qty": "0",
+            "leaves_qty": "2",
+            "last_fill": null,
+            "correction_of": null,
+            "reason": null
+          }
+        }
+      }
+    },
+    {
+      "event_id": "event-4",
+      "kind": "REPORT",
+      "at": "2026-11-04T00:00:00.040000Z",
+      "clock": {
+        "producer_id": "oms-test",
+        "epoch": "epoch-1",
+        "monotonic_ns": 40000000
+      },
+      "instrument_id": "SIM:KR-FUT1",
+      "data": {
+        "report": {
+          "schema_version": "0.2.0",
+          "message_type": "ExecutionReport",
+          "message_id": "report-4",
+          "run_id": "demo-fut-20261104",
+          "instrument_id": "SIM:KR-FUT1",
+          "source": "internal-paper-future",
+          "source_event_id": null,
+          "event_at": null,
+          "received_at": "2026-11-04T00:00:00.040000Z",
+          "ready_at": "2026-11-04T00:00:00.040000Z",
+          "data_origin": "SYNTHETIC",
+          "quality_flags": [],
+          "lineage": [],
+          "payload": {
+            "account_id": "paper-fut",
+            "client_order_id": "intent:0",
+            "broker_order_id": "broker:intent:0",
+            "event_type": "FILL",
+            "order_status": "PARTIALLY_FILLED",
+            "side": "BUY",
+            "position_effect": "OPEN",
+            "order_qty": "2",
+            "cum_filled_qty": "1",
+            "leaves_qty": "1",
+            "last_fill": {
+              "fill_id": "fill-1",
+              "quantity": "1",
+              "price": "101",
+              "charges": [
+                {
+                  "kind": "FEE",
+                  "asset": "KRW",
+                  "amount": "20"
+                }
+              ],
+              "clock": {
+                "producer_id": "oms-test",
+                "epoch": "epoch-1",
+                "monotonic_ns": 40000000
+              },
+              "executed_at": "2026-11-04T00:00:00.040000Z",
+              "execution_sequence": 1
+            },
+            "correction_of": null,
+            "reason": null
+          }
+        }
+      }
+    },
+    {
+      "event_id": "event-5",
+      "kind": "CANCEL",
+      "at": "2026-11-04T00:00:00.050000Z",
+      "clock": {
+        "producer_id": "oms-test",
+        "epoch": "epoch-1",
+        "monotonic_ns": 50000000
+      },
+      "instrument_id": "SIM:KR-FUT1",
+      "data": {
+        "order_id": "intent:0"
+      }
+    },
+    {
+      "event_id": "event-6",
+      "kind": "DISPATCH",
+      "at": "2026-11-04T00:00:00.060000Z",
+      "clock": {
+        "producer_id": "oms-test",
+        "epoch": "epoch-1",
+        "monotonic_ns": 60000000
+      },
+      "instrument_id": "SIM:KR-FUT1",
+      "data": {
+        "command_id": "intent:0:cancel:0"
+      }
+    },
+    {
+      "event_id": "event-7",
+      "kind": "REPORT",
+      "at": "2026-11-04T00:00:00.070000Z",
+      "clock": {
+        "producer_id": "oms-test",
+        "epoch": "epoch-1",
+        "monotonic_ns": 70000000
+      },
+      "instrument_id": "SIM:KR-FUT1",
+      "data": {
+        "report": {
+          "schema_version": "0.2.0",
+          "message_type": "ExecutionReport",
+          "message_id": "report-7",
+          "run_id": "demo-fut-20261104",
+          "instrument_id": "SIM:KR-FUT1",
+          "source": "internal-paper-future",
+          "source_event_id": null,
+          "event_at": null,
+          "received_at": "2026-11-04T00:00:00.070000Z",
+          "ready_at": "2026-11-04T00:00:00.070000Z",
+          "data_origin": "SYNTHETIC",
+          "quality_flags": [],
+          "lineage": [],
+          "payload": {
+            "account_id": "paper-fut",
+            "client_order_id": "intent:0",
+            "broker_order_id": "broker:intent:0",
+            "event_type": "CANCEL_ACK",
+            "order_status": "CANCELED",
+            "side": "BUY",
+            "position_effect": "OPEN",
+            "order_qty": "2",
+            "cum_filled_qty": "1",
+            "leaves_qty": "0",
+            "last_fill": null,
+            "correction_of": null,
+            "reason": null
+          }
+        }
+      }
+    },
+    {
+      "event_id": "event-8",
+      "kind": "REPORT",
+      "at": "2026-11-04T00:00:00.080000Z",
+      "clock": {
+        "producer_id": "oms-test",
+        "epoch": "epoch-1",
+        "monotonic_ns": 80000000
+      },
+      "instrument_id": "SIM:KR-FUT1",
+      "data": {
+        "report": {
+          "schema_version": "0.2.0",
+          "message_type": "ExecutionReport",
+          "message_id": "report-8",
+          "run_id": "demo-fut-20261104",
+          "instrument_id": "SIM:KR-FUT1",
+          "source": "internal-paper-future",
+          "source_event_id": null,
+          "event_at": null,
+          "received_at": "2026-11-04T00:00:00.080000Z",
+          "ready_at": "2026-11-04T00:00:00.080000Z",
+          "data_origin": "SYNTHETIC",
+          "quality_flags": [],
+          "lineage": [],
+          "payload": {
+            "account_id": "paper-fut",
+            "client_order_id": "intent:0",
+            "broker_order_id": "broker:intent:0",
+            "event_type": "FILL",
+            "order_status": "FILLED",
+            "side": "BUY",
+            "position_effect": "OPEN",
+            "order_qty": "2",
+            "cum_filled_qty": "2",
+            "leaves_qty": "0",
+            "last_fill": {
+              "fill_id": "fill-2",
+              "quantity": "1",
+              "price": "101",
+              "charges": [
+                {
+                  "kind": "FEE",
+                  "asset": "KRW",
+                  "amount": "20"
+                }
+              ],
+              "clock": {
+                "producer_id": "oms-test",
+                "epoch": "epoch-1",
+                "monotonic_ns": 80000000
+              },
+              "executed_at": "2026-11-04T00:00:00.080000Z",
+              "execution_sequence": 2
+            },
+            "correction_of": null,
+            "reason": null
+          }
+        }
+      }
+    },
+    {
+      "event_id": "event-9",
+      "kind": "MARK",
+      "at": "2026-11-04T00:00:00.090000Z",
+      "clock": {
+        "producer_id": "oms-test",
+        "epoch": "epoch-1",
+        "monotonic_ns": 90000000
+      },
+      "instrument_id": "SIM:KR-FUT1",
+      "data": {
+        "price": "102"
+      }
+    },
+    {
+      "event_id": "event-10",
+      "kind": "SETTLE",
+      "at": "2026-11-04T00:00:00.100000Z",
+      "clock": {
+        "producer_id": "oms-test",
+        "epoch": "epoch-1",
+        "monotonic_ns": 100000000
+      },
+      "instrument_id": "SIM:KR-FUT1",
+      "data": {
+        "price": "102"
+      }
+    },
+    {
+      "event_id": "event-11",
+      "kind": "TARGET",
+      "at": "2026-11-04T00:00:00.110000Z",
+      "clock": {
+        "producer_id": "oms-test",
+        "epoch": "epoch-1",
+        "monotonic_ns": 110000000
+      },
+      "instrument_id": "SIM:KR-FUT1",
+      "data": {
+        "intent_id": "close",
+        "intent_expires_at": "2026-11-04T00:00:05.000000Z",
+        "signal": {
+          "signal_version": "static-obi-v1",
+          "decision_id": "signal-11",
+          "run_id": "demo-fut-20261104",
+          "account_id": "paper-fut",
+          "instrument_id": "SIM:KR-FUT1",
+          "provider_kind": "STATIC",
+          "as_of": "2026-11-04T00:00:00.110000Z",
+          "policy_ref": "policy-11",
+          "quote_ref": "quote-11",
+          "quantity_unit": "CONTRACT",
+          "actual_position_qty": "2",
+          "target_position_qty": "0",
+          "action": "EXIT",
+          "entry_allowed": false,
+          "input_refs": [
+            "policy-11",
+            "quote-11"
+          ]
+        },
+        "policy": {
+          "schema_version": "0.2.0",
+          "message_type": "TradingPolicy",
+          "message_id": "policy-11",
+          "run_id": "demo-fut-20261104",
+          "instrument_id": "SIM:KR-FUT1",
+          "source": "static-policy",
+          "source_event_id": null,
+          "event_at": null,
+          "received_at": "2026-11-04T00:00:00.000000Z",
+          "ready_at": "2026-11-04T00:00:00.000000Z",
+          "data_origin": "SYNTHETIC",
+          "quality_flags": [],
+          "lineage": [],
+          "payload": {
+            "policy_id": "policy-fut-1",
+            "provider_kind": "STATIC",
+            "provider_epoch": "demo-epoch-1",
+            "revision": 1,
+            "account_id": "paper-fut",
+            "instrument_spec_ref": "spec-fut-v1",
+            "universe_ref": "u-fut-1",
+            "valid_from": "2026-11-04T00:00:00.000000Z",
+            "expires_at": "2026-11-04T00:00:05.000000Z",
+            "allowed_position_directions": [
+              "LONG",
+              "SHORT"
+            ],
+            "target_position_qty": "0",
+            "entry": {
+              "obi_long": 0.6,
+              "obi_short": -0.6,
+              "slope_min_per_second": null,
+              "min_observations": 3,
+              "min_duration_ms": 200,
+              "max_observation_gap_ms": 500
+            },
+            "hold_exit": {
+              "long_hold_obi": 0.2,
+              "short_hold_obi": -0.2,
+              "max_hold_ms": 30000,
+              "exit_target_qty": "0",
+              "emergency_rule_ref": "futures-emergency-demo-v1"
+            },
+            "smoothing": {
+              "method": "TIME_EMA",
+              "tau_ms": 500
+            },
+            "execution_limits": {
+              "max_order_notional": {
+                "asset": "KRW",
+                "amount": "3000000"
+              },
+              "max_position_qty": "10",
+              "max_initial_margin": {
+                "asset": "KRW",
+                "amount": "200000"
+              },
+              "max_spread_ticks": 2,
+              "max_quote_age_ms": 1000,
+              "order_ttl_ms": 1000,
+              "max_retries": 1,
+              "max_slippage_ticks": 1,
+              "price_reference_mode": "AT_INTENT_CREATION",
+              "price_reference_ref": null
+            },
+            "risk_budget_ref": "risk-fut-v1",
+            "regime": null,
+            "rationale": "PLUMBING_TEST_ONLY",
+            "input_refs": [
+              "u-fut-1"
+            ],
+            "strategy_version": "static-obi-v1",
+            "state_max_age_ms": 5000,
+            "feature_config_ref": "feature-config"
+          }
+        },
+        "quote": {
+          "schema_version": "0.2.0",
+          "message_type": "MarketSnapshot",
+          "message_id": "quote-11",
+          "run_id": "demo-fut-20261104",
+          "instrument_id": "SIM:KR-FUT1",
+          "source": "future-fixture",
+          "source_event_id": null,
+          "event_at": null,
+          "received_at": "2026-11-04T00:00:00.110000Z",
+          "ready_at": "2026-11-04T00:00:00.110000Z",
+          "data_origin": "SYNTHETIC",
+          "quality_flags": [],
+          "lineage": [],
+          "payload": {
+            "instrument_spec_ref": "spec-fut-v1",
+            "trading_date": "2026-11-04",
+            "update_kind": "BOOK",
+            "market_status": "CONTINUOUS",
+            "book": {
+              "coverage": "TOP_N_SNAPSHOT",
+              "sync_status": "SYNCED",
+              "source_sequence": null,
+              "bids": [
+                {
+                  "price": "100.9",
+                  "quantity": "10"
+                }
+              ],
+              "asks": [
+                {
+                  "price": "101",
+                  "quantity": "10"
+                }
+              ]
+            },
+            "trade": null,
+            "features": null
+          }
+        },
+        "quote_clock": {
+          "producer_id": "oms-test",
+          "epoch": "epoch-1",
+          "monotonic_ns": 110000000
+        },
+        "seen_at": {
+          "policy-11": "2026-11-04T00:00:00.000000Z",
+          "quote-11": "2026-11-04T00:00:00.110000Z"
+        },
+        "limit_price": "100.9",
+        "fee_reserve": {
+          "asset": "KRW",
+          "amount": "100"
+        }
+      }
+    },
+    {
+      "event_id": "event-12",
+      "kind": "DISPATCH",
+      "at": "2026-11-04T00:00:00.120000Z",
+      "clock": {
+        "producer_id": "oms-test",
+        "epoch": "epoch-1",
+        "monotonic_ns": 120000000
+      },
+      "instrument_id": "SIM:KR-FUT1",
+      "data": {
+        "command_id": "close:0:new:0"
+      }
+    },
+    {
+      "event_id": "event-13",
+      "kind": "REPORT",
+      "at": "2026-11-04T00:00:00.130000Z",
+      "clock": {
+        "producer_id": "oms-test",
+        "epoch": "epoch-1",
+        "monotonic_ns": 130000000
+      },
+      "instrument_id": "SIM:KR-FUT1",
+      "data": {
+        "report": {
+          "schema_version": "0.2.0",
+          "message_type": "ExecutionReport",
+          "message_id": "report-13",
+          "run_id": "demo-fut-20261104",
+          "instrument_id": "SIM:KR-FUT1",
+          "source": "internal-paper-future",
+          "source_event_id": null,
+          "event_at": null,
+          "received_at": "2026-11-04T00:00:00.130000Z",
+          "ready_at": "2026-11-04T00:00:00.130000Z",
+          "data_origin": "SYNTHETIC",
+          "quality_flags": [],
+          "lineage": [],
+          "payload": {
+            "account_id": "paper-fut",
+            "client_order_id": "close:0",
+            "broker_order_id": "broker:close:0",
+            "event_type": "FILL",
+            "order_status": "PARTIALLY_FILLED",
+            "side": "SELL",
+            "position_effect": "CLOSE",
+            "order_qty": "2",
+            "cum_filled_qty": "1",
+            "leaves_qty": "1",
+            "last_fill": {
+              "fill_id": "fill-3",
+              "quantity": "1",
+              "price": "103",
+              "charges": [
+                {
+                  "kind": "FEE",
+                  "asset": "KRW",
+                  "amount": "20"
+                }
+              ],
+              "clock": {
+                "producer_id": "oms-test",
+                "epoch": "epoch-1",
+                "monotonic_ns": 130000000
+              },
+              "executed_at": "2026-11-04T00:00:00.130000Z",
+              "execution_sequence": 3
+            },
+            "correction_of": null,
+            "reason": null
+          }
+        }
+      }
+    },
+    {
+      "event_id": "event-14",
+      "kind": "REPORT",
+      "at": "2026-11-04T00:00:00.140000Z",
+      "clock": {
+        "producer_id": "oms-test",
+        "epoch": "epoch-1",
+        "monotonic_ns": 140000000
+      },
+      "instrument_id": "SIM:KR-FUT1",
+      "data": {
+        "report": {
+          "schema_version": "0.2.0",
+          "message_type": "ExecutionReport",
+          "message_id": "report-14",
+          "run_id": "demo-fut-20261104",
+          "instrument_id": "SIM:KR-FUT1",
+          "source": "internal-paper-future",
+          "source_event_id": null,
+          "event_at": null,
+          "received_at": "2026-11-04T00:00:00.140000Z",
+          "ready_at": "2026-11-04T00:00:00.140000Z",
+          "data_origin": "SYNTHETIC",
+          "quality_flags": [],
+          "lineage": [],
+          "payload": {
+            "account_id": "paper-fut",
+            "client_order_id": "close:0",
+            "broker_order_id": "broker:close:0",
+            "event_type": "FILL",
+            "order_status": "FILLED",
+            "side": "SELL",
+            "position_effect": "CLOSE",
+            "order_qty": "2",
+            "cum_filled_qty": "2",
+            "leaves_qty": "0",
+            "last_fill": {
+              "fill_id": "fill-4",
+              "quantity": "1",
+              "price": "103",
+              "charges": [
+                {
+                  "kind": "FEE",
+                  "asset": "KRW",
+                  "amount": "20"
+                }
+              ],
+              "clock": {
+                "producer_id": "oms-test",
+                "epoch": "epoch-1",
+                "monotonic_ns": 140000000
+              },
+              "executed_at": "2026-11-04T00:00:00.140000Z",
+              "execution_sequence": 4
+            },
+            "correction_of": null,
+            "reason": null
+          }
+        }
+      }
+    },
+    {
+      "event_id": "event-15",
+      "kind": "DISCONNECT",
+      "at": "2026-11-04T00:00:00.150000Z",
+      "clock": {
+        "producer_id": "oms-test",
+        "epoch": "epoch-1",
+        "monotonic_ns": 150000000
+      },
+      "instrument_id": "SIM:KR-FUT1",
+      "data": {}
+    },
+    {
+      "event_id": "event-16",
+      "kind": "RECONCILE",
+      "at": "2026-11-04T00:00:00.160000Z",
+      "clock": {
+        "producer_id": "oms-test",
+        "epoch": "epoch-1",
+        "monotonic_ns": 160000000
+      },
+      "instrument_id": "SIM:KR-FUT1",
+      "data": {
+        "complete": true,
+        "transport_quiesced": true,
+        "execution_scope": "synthetic-broker/session-1",
+        "watermark": 0,
+        "as_of": "2026-11-04T00:00:00.160000Z",
+        "executions": [
+          {
+            "schema_version": "0.2.0",
+            "message_type": "ExecutionReport",
+            "message_id": "report-4",
+            "run_id": "demo-fut-20261104",
+            "instrument_id": "SIM:KR-FUT1",
+            "source": "internal-paper-future",
+            "source_event_id": null,
+            "event_at": null,
+            "received_at": "2026-11-04T00:00:00.040000Z",
+            "ready_at": "2026-11-04T00:00:00.040000Z",
+            "data_origin": "SYNTHETIC",
+            "quality_flags": [],
+            "lineage": [],
+            "payload": {
+              "account_id": "paper-fut",
+              "client_order_id": "intent:0",
+              "broker_order_id": "broker:intent:0",
+              "event_type": "FILL",
+              "order_status": "PARTIALLY_FILLED",
+              "side": "BUY",
+              "position_effect": "OPEN",
+              "order_qty": "2",
+              "cum_filled_qty": "1",
+              "leaves_qty": "1",
+              "last_fill": {
+                "fill_id": "fill-1",
+                "quantity": "1",
+                "price": "101",
+                "charges": [
+                  {
+                    "kind": "FEE",
+                    "asset": "KRW",
+                    "amount": "20"
+                  }
+                ],
+                "clock": {
+                  "producer_id": "oms-test",
+                  "epoch": "epoch-1",
+                  "monotonic_ns": 40000000
+                },
+                "executed_at": "2026-11-04T00:00:00.040000Z",
+                "execution_sequence": 1
+              },
+              "correction_of": null,
+              "reason": null
+            }
+          },
+          {
+            "schema_version": "0.2.0",
+            "message_type": "ExecutionReport",
+            "message_id": "report-8",
+            "run_id": "demo-fut-20261104",
+            "instrument_id": "SIM:KR-FUT1",
+            "source": "internal-paper-future",
+            "source_event_id": null,
+            "event_at": null,
+            "received_at": "2026-11-04T00:00:00.080000Z",
+            "ready_at": "2026-11-04T00:00:00.080000Z",
+            "data_origin": "SYNTHETIC",
+            "quality_flags": [],
+            "lineage": [],
+            "payload": {
+              "account_id": "paper-fut",
+              "client_order_id": "intent:0",
+              "broker_order_id": "broker:intent:0",
+              "event_type": "FILL",
+              "order_status": "FILLED",
+              "side": "BUY",
+              "position_effect": "OPEN",
+              "order_qty": "2",
+              "cum_filled_qty": "2",
+              "leaves_qty": "0",
+              "last_fill": {
+                "fill_id": "fill-2",
+                "quantity": "1",
+                "price": "101",
+                "charges": [
+                  {
+                    "kind": "FEE",
+                    "asset": "KRW",
+                    "amount": "20"
+                  }
+                ],
+                "clock": {
+                  "producer_id": "oms-test",
+                  "epoch": "epoch-1",
+                  "monotonic_ns": 80000000
+                },
+                "executed_at": "2026-11-04T00:00:00.080000Z",
+                "execution_sequence": 2
+              },
+              "correction_of": null,
+              "reason": null
+            }
+          },
+          {
+            "schema_version": "0.2.0",
+            "message_type": "ExecutionReport",
+            "message_id": "report-13",
+            "run_id": "demo-fut-20261104",
+            "instrument_id": "SIM:KR-FUT1",
+            "source": "internal-paper-future",
+            "source_event_id": null,
+            "event_at": null,
+            "received_at": "2026-11-04T00:00:00.130000Z",
+            "ready_at": "2026-11-04T00:00:00.130000Z",
+            "data_origin": "SYNTHETIC",
+            "quality_flags": [],
+            "lineage": [],
+            "payload": {
+              "account_id": "paper-fut",
+              "client_order_id": "close:0",
+              "broker_order_id": "broker:close:0",
+              "event_type": "FILL",
+              "order_status": "PARTIALLY_FILLED",
+              "side": "SELL",
+              "position_effect": "CLOSE",
+              "order_qty": "2",
+              "cum_filled_qty": "1",
+              "leaves_qty": "1",
+              "last_fill": {
+                "fill_id": "fill-3",
+                "quantity": "1",
+                "price": "103",
+                "charges": [
+                  {
+                    "kind": "FEE",
+                    "asset": "KRW",
+                    "amount": "20"
+                  }
+                ],
+                "clock": {
+                  "producer_id": "oms-test",
+                  "epoch": "epoch-1",
+                  "monotonic_ns": 130000000
+                },
+                "executed_at": "2026-11-04T00:00:00.130000Z",
+                "execution_sequence": 3
+              },
+              "correction_of": null,
+              "reason": null
+            }
+          },
+          {
+            "schema_version": "0.2.0",
+            "message_type": "ExecutionReport",
+            "message_id": "report-14",
+            "run_id": "demo-fut-20261104",
+            "instrument_id": "SIM:KR-FUT1",
+            "source": "internal-paper-future",
+            "source_event_id": null,
+            "event_at": null,
+            "received_at": "2026-11-04T00:00:00.140000Z",
+            "ready_at": "2026-11-04T00:00:00.140000Z",
+            "data_origin": "SYNTHETIC",
+            "quality_flags": [],
+            "lineage": [],
+            "payload": {
+              "account_id": "paper-fut",
+              "client_order_id": "close:0",
+              "broker_order_id": "broker:close:0",
+              "event_type": "FILL",
+              "order_status": "FILLED",
+              "side": "SELL",
+              "position_effect": "CLOSE",
+              "order_qty": "2",
+              "cum_filled_qty": "2",
+              "leaves_qty": "0",
+              "last_fill": {
+                "fill_id": "fill-4",
+                "quantity": "1",
+                "price": "103",
+                "charges": [
+                  {
+                    "kind": "FEE",
+                    "asset": "KRW",
+                    "amount": "20"
+                  }
+                ],
+                "clock": {
+                  "producer_id": "oms-test",
+                  "epoch": "epoch-1",
+                  "monotonic_ns": 140000000
+                },
+                "executed_at": "2026-11-04T00:00:00.140000Z",
+                "execution_sequence": 4
+              },
+              "correction_of": null,
+              "reason": null
+            }
+          }
+        ],
+        "open_orders": [],
+        "positions": [
+          {
+            "instrument_id": "SIM:KR-FUT1",
+            "net_qty": "0"
+          }
+        ],
+        "balances": {
+          "KRW": "1003920"
+        },
+        "margin": {
+          "asset": "KRW",
+          "initial_used": "0",
+          "maintenance_required": "0",
+          "order_reserved": "0",
+          "available_margin": "1003920"
+        }
+      }
+    },
+    {
+      "event_id": "event-17",
+      "kind": "TARGET",
+      "at": "2026-11-04T00:00:00.170000Z",
+      "clock": {
+        "producer_id": "oms-test",
+        "epoch": "epoch-1",
+        "monotonic_ns": 170000000
+      },
+      "instrument_id": "SIM:KR-FUT1",
+      "data": {
+        "intent_id": "short",
+        "intent_expires_at": "2026-11-04T00:00:05.000000Z",
+        "signal": {
+          "signal_version": "static-obi-v1",
+          "decision_id": "signal-17",
+          "run_id": "demo-fut-20261104",
+          "account_id": "paper-fut",
+          "instrument_id": "SIM:KR-FUT1",
+          "provider_kind": "STATIC",
+          "as_of": "2026-11-04T00:00:00.170000Z",
+          "policy_ref": "policy-17",
+          "quote_ref": "quote-17",
+          "quantity_unit": "CONTRACT",
+          "actual_position_qty": "0",
+          "target_position_qty": "-2",
+          "action": "ENTER",
+          "entry_allowed": true,
+          "input_refs": [
+            "policy-17",
+            "quote-17"
+          ]
+        },
+        "policy": {
+          "schema_version": "0.2.0",
+          "message_type": "TradingPolicy",
+          "message_id": "policy-17",
+          "run_id": "demo-fut-20261104",
+          "instrument_id": "SIM:KR-FUT1",
+          "source": "static-policy",
+          "source_event_id": null,
+          "event_at": null,
+          "received_at": "2026-11-04T00:00:00.000000Z",
+          "ready_at": "2026-11-04T00:00:00.000000Z",
+          "data_origin": "SYNTHETIC",
+          "quality_flags": [],
+          "lineage": [],
+          "payload": {
+            "policy_id": "policy-fut-1",
+            "provider_kind": "STATIC",
+            "provider_epoch": "demo-epoch-1",
+            "revision": 1,
+            "account_id": "paper-fut",
+            "instrument_spec_ref": "spec-fut-v1",
+            "universe_ref": "u-fut-1",
+            "valid_from": "2026-11-04T00:00:00.000000Z",
+            "expires_at": "2026-11-04T00:00:05.000000Z",
+            "allowed_position_directions": [
+              "LONG",
+              "SHORT"
+            ],
+            "target_position_qty": "-2",
+            "entry": {
+              "obi_long": 0.6,
+              "obi_short": -0.6,
+              "slope_min_per_second": null,
+              "min_observations": 3,
+              "min_duration_ms": 200,
+              "max_observation_gap_ms": 500
+            },
+            "hold_exit": {
+              "long_hold_obi": 0.2,
+              "short_hold_obi": -0.2,
+              "max_hold_ms": 30000,
+              "exit_target_qty": "0",
+              "emergency_rule_ref": "futures-emergency-demo-v1"
+            },
+            "smoothing": {
+              "method": "TIME_EMA",
+              "tau_ms": 500
+            },
+            "execution_limits": {
+              "max_order_notional": {
+                "asset": "KRW",
+                "amount": "3000000"
+              },
+              "max_position_qty": "10",
+              "max_initial_margin": {
+                "asset": "KRW",
+                "amount": "200000"
+              },
+              "max_spread_ticks": 2,
+              "max_quote_age_ms": 1000,
+              "order_ttl_ms": 1000,
+              "max_retries": 1,
+              "max_slippage_ticks": 1,
+              "price_reference_mode": "AT_INTENT_CREATION",
+              "price_reference_ref": null
+            },
+            "risk_budget_ref": "risk-fut-v1",
+            "regime": null,
+            "rationale": "PLUMBING_TEST_ONLY",
+            "input_refs": [
+              "u-fut-1"
+            ],
+            "strategy_version": "static-obi-v1",
+            "state_max_age_ms": 5000,
+            "feature_config_ref": "feature-config"
+          }
+        },
+        "quote": {
+          "schema_version": "0.2.0",
+          "message_type": "MarketSnapshot",
+          "message_id": "quote-17",
+          "run_id": "demo-fut-20261104",
+          "instrument_id": "SIM:KR-FUT1",
+          "source": "future-fixture",
+          "source_event_id": null,
+          "event_at": null,
+          "received_at": "2026-11-04T00:00:00.170000Z",
+          "ready_at": "2026-11-04T00:00:00.170000Z",
+          "data_origin": "SYNTHETIC",
+          "quality_flags": [],
+          "lineage": [],
+          "payload": {
+            "instrument_spec_ref": "spec-fut-v1",
+            "trading_date": "2026-11-04",
+            "update_kind": "BOOK",
+            "market_status": "CONTINUOUS",
+            "book": {
+              "coverage": "TOP_N_SNAPSHOT",
+              "sync_status": "SYNCED",
+              "source_sequence": null,
+              "bids": [
+                {
+                  "price": "100.9",
+                  "quantity": "10"
+                }
+              ],
+              "asks": [
+                {
+                  "price": "101",
+                  "quantity": "10"
+                }
+              ]
+            },
+            "trade": null,
+            "features": null
+          }
+        },
+        "quote_clock": {
+          "producer_id": "oms-test",
+          "epoch": "epoch-1",
+          "monotonic_ns": 170000000
+        },
+        "seen_at": {
+          "policy-17": "2026-11-04T00:00:00.000000Z",
+          "quote-17": "2026-11-04T00:00:00.170000Z"
+        },
+        "limit_price": "100.9",
+        "fee_reserve": {
+          "asset": "KRW",
+          "amount": "100"
+        }
+      }
+    },
+    {
+      "event_id": "event-18",
+      "kind": "DISPATCH",
+      "at": "2026-11-04T00:00:00.180000Z",
+      "clock": {
+        "producer_id": "oms-test",
+        "epoch": "epoch-1",
+        "monotonic_ns": 180000000
+      },
+      "instrument_id": "SIM:KR-FUT1",
+      "data": {
+        "command_id": "short:0:new:0"
+      }
+    },
+    {
+      "event_id": "event-19",
+      "kind": "REPORT",
+      "at": "2026-11-04T00:00:00.190000Z",
+      "clock": {
+        "producer_id": "oms-test",
+        "epoch": "epoch-1",
+        "monotonic_ns": 190000000
+      },
+      "instrument_id": "SIM:KR-FUT1",
+      "data": {
+        "report": {
+          "schema_version": "0.2.0",
+          "message_type": "ExecutionReport",
+          "message_id": "report-19",
+          "run_id": "demo-fut-20261104",
+          "instrument_id": "SIM:KR-FUT1",
+          "source": "internal-paper-future",
+          "source_event_id": null,
+          "event_at": null,
+          "received_at": "2026-11-04T00:00:00.190000Z",
+          "ready_at": "2026-11-04T00:00:00.190000Z",
+          "data_origin": "SYNTHETIC",
+          "quality_flags": [],
+          "lineage": [],
+          "payload": {
+            "account_id": "paper-fut",
+            "client_order_id": "short:0",
+            "broker_order_id": "broker:short:0",
+            "event_type": "FILL",
+            "order_status": "FILLED",
+            "side": "SELL",
+            "position_effect": "OPEN",
+            "order_qty": "2",
+            "cum_filled_qty": "2",
+            "leaves_qty": "0",
+            "last_fill": {
+              "fill_id": "fill-5",
+              "quantity": "2",
+              "price": "101",
+              "charges": [
+                {
+                  "kind": "FEE",
+                  "asset": "KRW",
+                  "amount": "40"
+                }
+              ],
+              "clock": {
+                "producer_id": "oms-test",
+                "epoch": "epoch-1",
+                "monotonic_ns": 190000000
+              },
+              "executed_at": "2026-11-04T00:00:00.190000Z",
+              "execution_sequence": 5
+            },
+            "correction_of": null,
+            "reason": null
+          }
+        }
+      }
+    },
+    {
+      "event_id": "event-20",
+      "kind": "MARK",
+      "at": "2026-11-04T00:00:00.200000Z",
+      "clock": {
+        "producer_id": "oms-test",
+        "epoch": "epoch-1",
+        "monotonic_ns": 200000000
+      },
+      "instrument_id": "SIM:KR-FUT1",
+      "data": {
+        "price": "100"
+      }
+    }
+  ]
+}
