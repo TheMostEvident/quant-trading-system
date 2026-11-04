@@ -1,0 +1,875 @@
+{
+  "scenario_version": "layer1-scenario-v1",
+  "config": {
+    "model": "synthetic-fifo-v1",
+    "data_origin": "SYNTHETIC",
+    "ready_at": "2026-11-05T00:00:00.000000Z",
+    "run_id": "layer1-synthetic",
+    "account_id": "paper-fut",
+    "execution_scope": "synthetic-broker/session-1",
+    "ledger_model": "FUTURES_MARGIN",
+    "valuation_asset": "KRW",
+    "balances": {
+      "KRW": "1000000"
+    },
+    "margin_rule_ref": "synthetic-margin-v1",
+    "max_gross_notional": "5000000",
+    "instruments": {
+      "SIM:KR-FUT1": {
+        "asset_class": "FUTURE",
+        "quantity_unit": "CONTRACT",
+        "price_unit": "INDEX_POINT",
+        "qty_step": "1",
+        "min_qty": "1",
+        "contract_multiplier": "1000",
+        "pnl_asset": "KRW",
+        "quote_asset": "KRW",
+        "base_asset": null,
+        "tick_size": "0.1",
+        "position_mode": "NET",
+        "pnl_model": "LINEAR",
+        "can_open_long": true,
+        "can_open_short": true,
+        "margin_rule_ref": "synthetic-margin-v1",
+        "initial_per_contract": "20000",
+        "maintenance_per_contract": "15000",
+        "instrument_spec_ref": "spec-fut-v1"
+      }
+    }
+  },
+  "market_profile": {
+    "profile_version": 1,
+    "data_origin": "SYNTHETIC",
+    "instruments": [
+      {
+        "source_code": "SIMFUT1",
+        "instrument_id": "SIM:KR-FUT1",
+        "trading_date": "2026-11-05",
+        "specification": {
+          "synthetic_only": true,
+          "quantity_unit": "CONTRACT",
+          "price_unit": "INDEX_POINT",
+          "tick_size": "0.1",
+          "market": "SIM_DOMESTIC_INDEX_FUTURE"
+        },
+        "spec_verified": true,
+        "price_encoding": "SIGNED_MAGNITUDE"
+      }
+    ],
+    "status_codes": {
+      "3": "CONTINUOUS",
+      "8": "CLOSED"
+    },
+    "session_mapping_verified": true,
+    "mapping_evidence": "synthetic fixture only; installed futures session mapping is not verified",
+    "stale_after_ms": 2000,
+    "max_transport_delay_ms": 1000,
+    "heartbeat_timeout_ms": 3000,
+    "max_frame_bytes": 65536
+  },
+  "feature_config": {
+    "feature_version": "microstructure-v1",
+    "depth": 1,
+    "weights": [
+      "1"
+    ],
+    "smoothing": {
+      "method": "EVENT_EMA",
+      "tau_ms": null,
+      "alpha": 1
+    },
+    "window_ms": 1000,
+    "max_observation_gap_ms": 2000,
+    "max_window_events": 4096
+  },
+  "assumptions": {
+    "model": "synthetic-depth-highwater-v1",
+    "data_origin": "SYNTHETIC",
+    "order_latency_ms": 10,
+    "cancel_latency_ms": 20,
+    "report_latency_ms": 5,
+    "max_quote_age_ms": 1000,
+    "participation": "1",
+    "slippage_ticks": 0,
+    "max_contracts_per_book": 100,
+    "costs": {
+      "SIM:KR-FUT1": {
+        "asset": "KRW",
+        "per_contract": "20",
+        "notional_rate": "0",
+        "tax_rate": "0"
+      }
+    },
+    "contract_expiry": {
+      "SIM:KR-FUT1": "2026-11-05T00:01:00.000000Z"
+    },
+    "evidence": "Synthetic integration assumptions only"
+  },
+  "policies": {
+    "SIM:KR-FUT1": {
+      "schema_version": "0.2.0",
+      "message_type": "TradingPolicy",
+      "message_id": "tp-fut-1",
+      "run_id": "layer1-synthetic",
+      "instrument_id": "SIM:KR-FUT1",
+      "source": "static-policy",
+      "source_event_id": null,
+      "event_at": null,
+      "received_at": "2026-11-05T00:00:00.000000Z",
+      "ready_at": "2026-11-05T00:00:00.000000Z",
+      "data_origin": "SYNTHETIC",
+      "quality_flags": [],
+      "lineage": [],
+      "payload": {
+        "policy_id": "policy-fut-1",
+        "provider_kind": "STATIC",
+        "provider_epoch": "demo-epoch-1",
+        "revision": 1,
+        "account_id": "paper-fut",
+        "instrument_spec_ref": "spec-fut-v1",
+        "universe_ref": "u-fut-1",
+        "valid_from": "2026-11-05T00:00:00.000000Z",
+        "expires_at": "2026-11-05T00:01:00.000000Z",
+        "allowed_position_directions": [
+          "LONG",
+          "SHORT"
+        ],
+        "target_position_qty": "2",
+        "entry": {
+          "obi_long": 0.6,
+          "obi_short": -0.6,
+          "slope_min_per_second": null,
+          "min_observations": 3,
+          "min_duration_ms": 200,
+          "max_observation_gap_ms": 500
+        },
+        "hold_exit": {
+          "long_hold_obi": 0.2,
+          "short_hold_obi": -0.2,
+          "max_hold_ms": 30000,
+          "exit_target_qty": "0",
+          "emergency_rule_ref": "futures-emergency-demo-v1"
+        },
+        "smoothing": {
+          "method": "EVENT_EMA",
+          "tau_ms": null,
+          "alpha": 1
+        },
+        "execution_limits": {
+          "max_order_notional": {
+            "asset": "KRW",
+            "amount": "300000"
+          },
+          "max_position_qty": "2",
+          "max_initial_margin": {
+            "asset": "KRW",
+            "amount": "50000"
+          },
+          "max_spread_ticks": 2,
+          "max_quote_age_ms": 1000,
+          "order_ttl_ms": 1000,
+          "max_retries": 0,
+          "max_slippage_ticks": 1,
+          "price_reference_mode": "AT_INTENT_CREATION",
+          "price_reference_ref": null
+        },
+        "risk_budget_ref": "risk-fut-v1",
+        "regime": null,
+        "rationale": "PLUMBING_TEST_ONLY",
+        "input_refs": [
+          "u-fut-1"
+        ],
+        "strategy_version": "static-obi-v1",
+        "feature_config_ref": "feature-config",
+        "state_max_age_ms": 5000
+      }
+    }
+  },
+  "risk": {
+    "max_abs_position_qty": "2"
+  },
+  "fee_reserve": {
+    "asset": "KRW",
+    "amount": "100"
+  },
+  "clock_domain": {
+    "producer_id": "layer1-source",
+    "epoch": "v1"
+  },
+  "events": [
+    {
+      "kind": "CALLBACK",
+      "ready_at": "2026-11-05T00:00:00.000000Z",
+      "frame": {
+        "frame_version": 1,
+        "producer_id": "layer1-source",
+        "epoch": "v1",
+        "sequence": 1,
+        "received_at": "2026-11-05T00:00:00.000000Z",
+        "monotonic_ns": 0,
+        "data_origin": "SYNTHETIC",
+        "event": {
+          "kind": "CONNECTION",
+          "connected": true,
+          "server": "MOCK",
+          "error_code": 0
+        }
+      }
+    },
+    {
+      "kind": "CALLBACK",
+      "ready_at": "2026-11-05T00:00:00.010000Z",
+      "frame": {
+        "frame_version": 1,
+        "producer_id": "layer1-source",
+        "epoch": "v1",
+        "sequence": 2,
+        "received_at": "2026-11-05T00:00:00.010000Z",
+        "monotonic_ns": 10000000,
+        "data_origin": "SYNTHETIC",
+        "event": {
+          "kind": "REAL",
+          "code": "",
+          "real_type": "장시작시간",
+          "fields": {
+            "215": "3",
+            "20": "090000",
+            "214": "0"
+          },
+          "raw_real_data": "synthetic status"
+        }
+      }
+    },
+    {
+      "kind": "CALLBACK",
+      "ready_at": "2026-11-05T00:00:00.100000Z",
+      "frame": {
+        "frame_version": 1,
+        "producer_id": "layer1-source",
+        "epoch": "v1",
+        "sequence": 3,
+        "received_at": "2026-11-05T00:00:00.100000Z",
+        "monotonic_ns": 100000000,
+        "data_origin": "SYNTHETIC",
+        "event": {
+          "kind": "REAL",
+          "code": "SIMFUT1",
+          "real_type": "선물호가잔량",
+          "fields": {
+            "21": "090000",
+            "121": "9",
+            "125": "1",
+            "41": "+101.0",
+            "51": "+100.9",
+            "61": "1",
+            "71": "9",
+            "42": "+101.1",
+            "52": "+100.8",
+            "62": "1",
+            "72": "1",
+            "43": "+101.2",
+            "53": "+100.7",
+            "63": "1",
+            "73": "1",
+            "44": "+101.3",
+            "54": "+100.6",
+            "64": "1",
+            "74": "1",
+            "45": "+101.4",
+            "55": "+100.5",
+            "65": "1",
+            "75": "1"
+          },
+          "raw_real_data": "synthetic top-five"
+        }
+      }
+    },
+    {
+      "kind": "CALLBACK",
+      "ready_at": "2026-11-05T00:00:00.200000Z",
+      "frame": {
+        "frame_version": 1,
+        "producer_id": "layer1-source",
+        "epoch": "v1",
+        "sequence": 4,
+        "received_at": "2026-11-05T00:00:00.200000Z",
+        "monotonic_ns": 200000000,
+        "data_origin": "SYNTHETIC",
+        "event": {
+          "kind": "REAL",
+          "code": "SIMFUT1",
+          "real_type": "선물호가잔량",
+          "fields": {
+            "21": "090000",
+            "121": "9",
+            "125": "1",
+            "41": "+101.0",
+            "51": "+100.9",
+            "61": "1",
+            "71": "9",
+            "42": "+101.1",
+            "52": "+100.8",
+            "62": "1",
+            "72": "1",
+            "43": "+101.2",
+            "53": "+100.7",
+            "63": "1",
+            "73": "1",
+            "44": "+101.3",
+            "54": "+100.6",
+            "64": "1",
+            "74": "1",
+            "45": "+101.4",
+            "55": "+100.5",
+            "65": "1",
+            "75": "1"
+          },
+          "raw_real_data": "synthetic top-five"
+        }
+      }
+    },
+    {
+      "kind": "CALLBACK",
+      "ready_at": "2026-11-05T00:00:00.300000Z",
+      "frame": {
+        "frame_version": 1,
+        "producer_id": "layer1-source",
+        "epoch": "v1",
+        "sequence": 5,
+        "received_at": "2026-11-05T00:00:00.300000Z",
+        "monotonic_ns": 300000000,
+        "data_origin": "SYNTHETIC",
+        "event": {
+          "kind": "REAL",
+          "code": "SIMFUT1",
+          "real_type": "선물호가잔량",
+          "fields": {
+            "21": "090000",
+            "121": "9",
+            "125": "1",
+            "41": "+101.0",
+            "51": "+100.9",
+            "61": "1",
+            "71": "9",
+            "42": "+101.1",
+            "52": "+100.8",
+            "62": "1",
+            "72": "1",
+            "43": "+101.2",
+            "53": "+100.7",
+            "63": "1",
+            "73": "1",
+            "44": "+101.3",
+            "54": "+100.6",
+            "64": "1",
+            "74": "1",
+            "45": "+101.4",
+            "55": "+100.5",
+            "65": "1",
+            "75": "1"
+          },
+          "raw_real_data": "synthetic top-five"
+        }
+      }
+    },
+    {
+      "kind": "CALLBACK",
+      "ready_at": "2026-11-05T00:00:00.320000Z",
+      "frame": {
+        "frame_version": 1,
+        "producer_id": "layer1-source",
+        "epoch": "v1",
+        "sequence": 6,
+        "received_at": "2026-11-05T00:00:00.320000Z",
+        "monotonic_ns": 320000000,
+        "data_origin": "SYNTHETIC",
+        "event": {
+          "kind": "REAL",
+          "code": "SIMFUT1",
+          "real_type": "선물호가잔량",
+          "fields": {
+            "21": "090000",
+            "121": "18",
+            "125": "2",
+            "41": "+101.0",
+            "51": "+100.9",
+            "61": "2",
+            "71": "18",
+            "42": "+101.1",
+            "52": "+100.8",
+            "62": "1",
+            "72": "1",
+            "43": "+101.2",
+            "53": "+100.7",
+            "63": "1",
+            "73": "1",
+            "44": "+101.3",
+            "54": "+100.6",
+            "64": "1",
+            "74": "1",
+            "45": "+101.4",
+            "55": "+100.5",
+            "65": "1",
+            "75": "1"
+          },
+          "raw_real_data": "synthetic top-five"
+        }
+      }
+    },
+    {
+      "kind": "TIMER",
+      "at": "2026-11-05T00:00:00.330000Z"
+    },
+    {
+      "kind": "CALLBACK",
+      "ready_at": "2026-11-05T00:00:00.335000Z",
+      "frame": {
+        "frame_version": 1,
+        "producer_id": "layer1-source",
+        "epoch": "v1",
+        "sequence": 7,
+        "received_at": "2026-11-05T00:00:00.335000Z",
+        "monotonic_ns": 335000000,
+        "data_origin": "SYNTHETIC",
+        "event": {
+          "kind": "REAL",
+          "code": "SIMFUT1",
+          "real_type": "선물시세",
+          "fields": {
+            "20": "090000",
+            "10": "+101.0",
+            "15": "1",
+            "13": "1"
+          },
+          "raw_real_data": "synthetic trade"
+        }
+      }
+    },
+    {
+      "kind": "CALLBACK",
+      "ready_at": "2026-11-05T00:00:00.400000Z",
+      "frame": {
+        "frame_version": 1,
+        "producer_id": "layer1-source",
+        "epoch": "v1",
+        "sequence": 8,
+        "received_at": "2026-11-05T00:00:00.400000Z",
+        "monotonic_ns": 400000000,
+        "data_origin": "SYNTHETIC",
+        "event": {
+          "kind": "REAL",
+          "code": "SIMFUT1",
+          "real_type": "선물호가잔량",
+          "fields": {
+            "21": "090000",
+            "121": "6",
+            "125": "4",
+            "41": "+101.0",
+            "51": "+100.9",
+            "61": "4",
+            "71": "6",
+            "42": "+101.1",
+            "52": "+100.8",
+            "62": "1",
+            "72": "1",
+            "43": "+101.2",
+            "53": "+100.7",
+            "63": "1",
+            "73": "1",
+            "44": "+101.3",
+            "54": "+100.6",
+            "64": "1",
+            "74": "1",
+            "45": "+101.4",
+            "55": "+100.5",
+            "65": "1",
+            "75": "1"
+          },
+          "raw_real_data": "synthetic top-five"
+        }
+      }
+    },
+    {
+      "kind": "CALLBACK",
+      "ready_at": "2026-11-05T00:00:00.500000Z",
+      "frame": {
+        "frame_version": 1,
+        "producer_id": "layer1-source",
+        "epoch": "v1",
+        "sequence": 9,
+        "received_at": "2026-11-05T00:00:00.500000Z",
+        "monotonic_ns": 500000000,
+        "data_origin": "SYNTHETIC",
+        "event": {
+          "kind": "REAL",
+          "code": "SIMFUT1",
+          "real_type": "선물호가잔량",
+          "fields": {
+            "21": "090000",
+            "121": "1",
+            "125": "9",
+            "41": "+101.0",
+            "51": "+100.9",
+            "61": "9",
+            "71": "1",
+            "42": "+101.1",
+            "52": "+100.8",
+            "62": "1",
+            "72": "1",
+            "43": "+101.2",
+            "53": "+100.7",
+            "63": "1",
+            "73": "1",
+            "44": "+101.3",
+            "54": "+100.6",
+            "64": "1",
+            "74": "1",
+            "45": "+101.4",
+            "55": "+100.5",
+            "65": "1",
+            "75": "1"
+          },
+          "raw_real_data": "synthetic top-five"
+        }
+      }
+    },
+    {
+      "kind": "CALLBACK",
+      "ready_at": "2026-11-05T00:00:00.520000Z",
+      "frame": {
+        "frame_version": 1,
+        "producer_id": "layer1-source",
+        "epoch": "v1",
+        "sequence": 10,
+        "received_at": "2026-11-05T00:00:00.520000Z",
+        "monotonic_ns": 520000000,
+        "data_origin": "SYNTHETIC",
+        "event": {
+          "kind": "REAL",
+          "code": "SIMFUT1",
+          "real_type": "선물호가잔량",
+          "fields": {
+            "21": "090000",
+            "121": "2",
+            "125": "18",
+            "41": "+101.0",
+            "51": "+100.9",
+            "61": "18",
+            "71": "2",
+            "42": "+101.1",
+            "52": "+100.8",
+            "62": "1",
+            "72": "1",
+            "43": "+101.2",
+            "53": "+100.7",
+            "63": "1",
+            "73": "1",
+            "44": "+101.3",
+            "54": "+100.6",
+            "64": "1",
+            "74": "1",
+            "45": "+101.4",
+            "55": "+100.5",
+            "65": "1",
+            "75": "1"
+          },
+          "raw_real_data": "synthetic top-five"
+        }
+      }
+    },
+    {
+      "kind": "TIMER",
+      "at": "2026-11-05T00:00:00.530000Z"
+    },
+    {
+      "kind": "POLICY",
+      "at": "2026-11-05T00:00:00.540000Z",
+      "message": {
+        "schema_version": "0.2.0",
+        "message_type": "TradingPolicy",
+        "message_id": "policy-short",
+        "run_id": "layer1-synthetic",
+        "instrument_id": "SIM:KR-FUT1",
+        "source": "static-policy",
+        "source_event_id": null,
+        "event_at": null,
+        "received_at": "2026-11-05T00:00:00.540000Z",
+        "ready_at": "2026-11-05T00:00:00.540000Z",
+        "data_origin": "SYNTHETIC",
+        "quality_flags": [],
+        "lineage": [],
+        "payload": {
+          "policy_id": "policy-fut-1",
+          "provider_kind": "STATIC",
+          "provider_epoch": "demo-epoch-1",
+          "revision": 2,
+          "account_id": "paper-fut",
+          "instrument_spec_ref": "spec-fut-v1",
+          "universe_ref": "u-fut-1",
+          "valid_from": "2026-11-05T00:00:00.540000Z",
+          "expires_at": "2026-11-05T00:01:00.000000Z",
+          "allowed_position_directions": [
+            "LONG",
+            "SHORT"
+          ],
+          "target_position_qty": "-2",
+          "entry": {
+            "obi_long": 0.6,
+            "obi_short": -0.6,
+            "slope_min_per_second": null,
+            "min_observations": 3,
+            "min_duration_ms": 200,
+            "max_observation_gap_ms": 500
+          },
+          "hold_exit": {
+            "long_hold_obi": 0.2,
+            "short_hold_obi": -0.2,
+            "max_hold_ms": 30000,
+            "exit_target_qty": "0",
+            "emergency_rule_ref": "futures-emergency-demo-v1"
+          },
+          "smoothing": {
+            "method": "EVENT_EMA",
+            "tau_ms": null,
+            "alpha": 1
+          },
+          "execution_limits": {
+            "max_order_notional": {
+              "asset": "KRW",
+              "amount": "300000"
+            },
+            "max_position_qty": "2",
+            "max_initial_margin": {
+              "asset": "KRW",
+              "amount": "50000"
+            },
+            "max_spread_ticks": 2,
+            "max_quote_age_ms": 1000,
+            "order_ttl_ms": 1000,
+            "max_retries": 0,
+            "max_slippage_ticks": 1,
+            "price_reference_mode": "AT_INTENT_CREATION",
+            "price_reference_ref": null
+          },
+          "risk_budget_ref": "risk-fut-v1",
+          "regime": null,
+          "rationale": "PLUMBING_TEST_ONLY",
+          "input_refs": [
+            "u-fut-1"
+          ],
+          "strategy_version": "static-obi-v1",
+          "feature_config_ref": "feature-config",
+          "state_max_age_ms": 5000
+        }
+      }
+    },
+    {
+      "kind": "CALLBACK",
+      "ready_at": "2026-11-05T00:00:00.600000Z",
+      "frame": {
+        "frame_version": 1,
+        "producer_id": "layer1-source",
+        "epoch": "v1",
+        "sequence": 11,
+        "received_at": "2026-11-05T00:00:00.600000Z",
+        "monotonic_ns": 600000000,
+        "data_origin": "SYNTHETIC",
+        "event": {
+          "kind": "REAL",
+          "code": "SIMFUT1",
+          "real_type": "선물호가잔량",
+          "fields": {
+            "21": "090000",
+            "121": "1",
+            "125": "9",
+            "41": "+101.0",
+            "51": "+100.9",
+            "61": "9",
+            "71": "1",
+            "42": "+101.1",
+            "52": "+100.8",
+            "62": "1",
+            "72": "1",
+            "43": "+101.2",
+            "53": "+100.7",
+            "63": "1",
+            "73": "1",
+            "44": "+101.3",
+            "54": "+100.6",
+            "64": "1",
+            "74": "1",
+            "45": "+101.4",
+            "55": "+100.5",
+            "65": "1",
+            "75": "1"
+          },
+          "raw_real_data": "synthetic top-five"
+        }
+      }
+    },
+    {
+      "kind": "CALLBACK",
+      "ready_at": "2026-11-05T00:00:00.700000Z",
+      "frame": {
+        "frame_version": 1,
+        "producer_id": "layer1-source",
+        "epoch": "v1",
+        "sequence": 12,
+        "received_at": "2026-11-05T00:00:00.700000Z",
+        "monotonic_ns": 700000000,
+        "data_origin": "SYNTHETIC",
+        "event": {
+          "kind": "REAL",
+          "code": "SIMFUT1",
+          "real_type": "선물호가잔량",
+          "fields": {
+            "21": "090000",
+            "121": "1",
+            "125": "9",
+            "41": "+101.0",
+            "51": "+100.9",
+            "61": "9",
+            "71": "1",
+            "42": "+101.1",
+            "52": "+100.8",
+            "62": "1",
+            "72": "1",
+            "43": "+101.2",
+            "53": "+100.7",
+            "63": "1",
+            "73": "1",
+            "44": "+101.3",
+            "54": "+100.6",
+            "64": "1",
+            "74": "1",
+            "45": "+101.4",
+            "55": "+100.5",
+            "65": "1",
+            "75": "1"
+          },
+          "raw_real_data": "synthetic top-five"
+        }
+      }
+    },
+    {
+      "kind": "CALLBACK",
+      "ready_at": "2026-11-05T00:00:00.800000Z",
+      "frame": {
+        "frame_version": 1,
+        "producer_id": "layer1-source",
+        "epoch": "v1",
+        "sequence": 13,
+        "received_at": "2026-11-05T00:00:00.800000Z",
+        "monotonic_ns": 800000000,
+        "data_origin": "SYNTHETIC",
+        "event": {
+          "kind": "REAL",
+          "code": "SIMFUT1",
+          "real_type": "선물호가잔량",
+          "fields": {
+            "21": "090000",
+            "121": "1",
+            "125": "9",
+            "41": "+101.0",
+            "51": "+100.9",
+            "61": "9",
+            "71": "1",
+            "42": "+101.1",
+            "52": "+100.8",
+            "62": "1",
+            "72": "1",
+            "43": "+101.2",
+            "53": "+100.7",
+            "63": "1",
+            "73": "1",
+            "44": "+101.3",
+            "54": "+100.6",
+            "64": "1",
+            "74": "1",
+            "45": "+101.4",
+            "55": "+100.5",
+            "65": "1",
+            "75": "1"
+          },
+          "raw_real_data": "synthetic top-five"
+        }
+      }
+    },
+    {
+      "kind": "CALLBACK",
+      "ready_at": "2026-11-05T00:00:00.820000Z",
+      "frame": {
+        "frame_version": 1,
+        "producer_id": "layer1-source",
+        "epoch": "v1",
+        "sequence": 14,
+        "received_at": "2026-11-05T00:00:00.820000Z",
+        "monotonic_ns": 820000000,
+        "data_origin": "SYNTHETIC",
+        "event": {
+          "kind": "REAL",
+          "code": "SIMFUT1",
+          "real_type": "선물호가잔량",
+          "fields": {
+            "21": "090000",
+            "121": "2",
+            "125": "18",
+            "41": "+101.0",
+            "51": "+100.9",
+            "61": "18",
+            "71": "2",
+            "42": "+101.1",
+            "52": "+100.8",
+            "62": "1",
+            "72": "1",
+            "43": "+101.2",
+            "53": "+100.7",
+            "63": "1",
+            "73": "1",
+            "44": "+101.3",
+            "54": "+100.6",
+            "64": "1",
+            "74": "1",
+            "45": "+101.4",
+            "55": "+100.5",
+            "65": "1",
+            "75": "1"
+          },
+          "raw_real_data": "synthetic top-five"
+        }
+      }
+    },
+    {
+      "kind": "TIMER",
+      "at": "2026-11-05T00:00:00.830000Z"
+    },
+    {
+      "kind": "OMS",
+      "at": "2026-11-05T00:00:00.840000Z",
+      "event_kind": "MARK",
+      "instrument_id": "SIM:KR-FUT1",
+      "data": {
+        "price": "100"
+      }
+    },
+    {
+      "kind": "CALLBACK",
+      "ready_at": "2026-11-05T00:00:00.900000Z",
+      "frame": {
+        "frame_version": 1,
+        "producer_id": "layer1-source",
+        "epoch": "v1",
+        "sequence": 15,
+        "received_at": "2026-11-05T00:00:00.900000Z",
+        "monotonic_ns": 900000000,
+        "data_origin": "SYNTHETIC",
+        "event": {
+          "kind": "CONNECTION",
+          "connected": false,
+          "server": "UNKNOWN",
+          "error_code": 0
+        }
+      }
+    }
+  ]
+}

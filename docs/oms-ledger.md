@@ -66,6 +66,8 @@ UNRECONCILED로 멈춘다. DISPATCH의 재시도는 `ALREADY_CLAIMED/DO_NOT_RESE
 
 ## 입력과 signal 연결
 
+#9의 [통합·독립 검증](layer1-verification.md)은 실제 생성한 policy/book/account/position을 전달한 경계에서 signal을 연결한다. 합성 config의 선택 항목 `source_bindings`가 있으면 수집/원장이 정확히 같은 명세 binding artifact를 공유해야 한다. 미확인 단위나 승수를 자동 변환하지 않는다. 실제 broker 대조의 완전성·시각·ID 근거는 Extra Issue 3 (#45)에서 확인한다.
+
 입력은 `event_id`, `kind`, `at`(UTC 6자리),
 `clock={producer_id,epoch,monotonic_ns}`, `instrument_id`, `data`다.
 동일 epoch에서 시간 역행을 허용하지 않으며 clock domain 변경은 대조를 요구한다.

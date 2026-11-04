@@ -69,6 +69,16 @@ def validate_config(value):
             raise ValidationError("Cash inventory cannot inherit futures margin or implicit currency conversion")
     if c["ledger_model"] == "CASH" and len({s["base_asset"] for s in c["instruments"].values()}) != len(c["instruments"]):
         raise ValidationError("One cash inventory per base asset is supported")
+    if "source_bindings" in c:
+        bindings = c["source_bindings"]
+        if not isinstance(bindings, dict) or set(bindings) != set(c["instruments"]):
+            raise ValidationError("Complete synthetic source specification bindings required")
+        for instrument, spec in c["instruments"].items():
+            binding = bindings[instrument]
+            if (not isinstance(binding, dict) or binding.get("instrument_id") != instrument or not binding.get("source_code")
+                    or binding.get("spec_verified") is not True
+                    or binding.get("specification") != {k: v for k, v in spec.items() if k != "instrument_spec_ref"}):
+                raise ValidationError("Source and ledger specifications must match exactly")
     return c
 
 

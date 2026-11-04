@@ -1,0 +1,12 @@
+{
+  "positions": {"SIM:KR-FUT1": "-2"},
+  "balances": {"KRW": "999680"},
+  "equity": "1001480",
+  "initial_used": "40000",
+  "maintenance_required": "30000",
+  "charges_by_asset": {"KRW": "120"},
+  "traded_notional_by_asset": {"KRW": "605600"},
+  "generated_fills": 3,
+  "actionable_decisions": [["ENTER", "2"], ["EXIT", "0"], ["ENTER", "-2"]],
+  "note": "Hand expected: buy 2 at 101, sell 2 at 100.9, short 2 at 100.9, per-contract fee 20, multiplier 1000, mark 100. Synthetic only."
+}

@@ -45,6 +45,12 @@ def main(argv=None):
     paper = sub.add_parser("paper-scenario", help="Match explicit synthetic futures observations after latency; no broker connection")
     paper.add_argument("scenario")
     paper.add_argument("--output-dir", required=True)
+    layer1 = sub.add_parser("layer1-scenario", help="Run synthetic callbacks through features, policy, OMS and paper execution")
+    layer1.add_argument("scenario")
+    layer1.add_argument("--output-dir", required=True)
+    oms_audit = sub.add_parser("audit-oms", help="Independently replay saved synthetic economic inputs and matching bounds")
+    oms_audit.add_argument("directory")
+    oms_audit.add_argument("--output", required=True)
     profile_draft = sub.add_parser("market-profile-draft", help="Create an unverified observed profile; never enables the input gate")
     profile_draft.add_argument("--template", default="config/kiwoom.observed.example.json")
     profile_draft.add_argument("--code", required=True)
@@ -95,6 +101,15 @@ def main(argv=None):
     elif args.command == "paper-scenario":
         from .execution.paper_scenario import run_paper_scenario
         result = run_paper_scenario(args.scenario, args.output_dir)
+    elif args.command == "layer1-scenario":
+        from .validation.layer1 import run_layer1
+        result = run_layer1(args.scenario, args.output_dir)
+    elif args.command == "audit-oms":
+        from .validation.reference import audit_oms
+        from .market.field_run import write_new_json
+        result = audit_oms(args.directory)
+        write_new_json(args.output, result)
+        exit_code = 0 if result["verified"] else 2
     elif args.command == "market-profile-draft":
         from .market.field_run import make_profile, write_new_json
         result = make_profile(decode(Path(args.template).read_bytes()), args.code, args.trading_date)

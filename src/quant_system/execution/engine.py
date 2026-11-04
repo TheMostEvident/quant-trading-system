@@ -4,6 +4,7 @@ from copy import deepcopy
 from fractions import Fraction
 
 from quant_system.contracts import validate_message
+from quant_system.contracts.quality import execution_book_issues
 from quant_system.contracts.static_policy import validate_static_policy
 from quant_system.foundation.errors import ValidationError
 from quant_system.foundation.values import decode, digest, encode, utc_us
@@ -110,7 +111,7 @@ def _target(config, state, event):
         raise ValidationError("Opening signal requires an explicit entry gate and its original quote")
     if active_orders(state, instrument):
         return {"status": "BLOCKED", "reason": "LIVE_OR_UNCONFIRMED_ORDER"}
-    if quote["quality_flags"] or q["market_status"] != "CONTINUOUS" or q["update_kind"] != "BOOK" or not q["book"] or q["book"]["sync_status"] != "SYNCED":
+    if execution_book_issues(quote) or q["market_status"] != "CONTINUOUS" or q["update_kind"] != "BOOK" or not q["book"] or q["book"]["sync_status"] != "SYNCED":
         return {"status": "BLOCKED", "reason": "CURRENT_TRADABLE_BOOK_REQUIRED"}
     now = clock(event["clock"])
     qc = clock(d["quote_clock"])

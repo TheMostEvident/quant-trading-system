@@ -52,8 +52,9 @@ class ExecutionJournal:
         else:
             at = self.config["ready_at"]; utc_us(at)
             store.put_artifact(self.config_ref, self.run_id, self.config, ready_at=at)
-            for s in self.config["instruments"].values():
-                store.put_artifact(s["instrument_spec_ref"], self.run_id, s, ready_at=at)
+            for instrument, s in self.config["instruments"].items():
+                artifact = self.config.get("source_bindings", {}).get(instrument, s)
+                store.put_artifact(s["instrument_spec_ref"], self.run_id, artifact, ready_at=at)
             if self.config["ledger_model"] == "FUTURES_MARGIN":
                 store.put_artifact(self.config["margin_rule_ref"], self.run_id, {"model": self.config["model"], "rates": {k: {x: s[x] for x in ("initial_per_contract", "maintenance_per_contract")} for k, s in self.config["instruments"].items()}}, ready_at=at)
             state = initial(self.config); raw = encode(state)

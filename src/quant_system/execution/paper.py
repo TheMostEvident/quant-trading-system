@@ -4,6 +4,7 @@ from copy import deepcopy
 from fractions import Fraction
 
 from quant_system.contracts import validate_message
+from quant_system.contracts.quality import execution_book_issues
 from quant_system.foundation.errors import ValidationError
 from quant_system.foundation.values import digest, encode, timestamp, utc_us
 from quant_system.strategy.engine import clock as checked_clock
@@ -176,7 +177,15 @@ class PaperBroker:
             return output
         self.latest_received[instrument] = received
         book = payload["book"]
-        if message["quality_flags"] or payload["update_kind"] != "BOOK" or payload["market_status"] != "CONTINUOUS" or not book or book["sync_status"] != "SYNCED":
+        features = payload.get("features")
+        observation_ns = clock["monotonic_ns"]
+        if features:
+            source_clock = features["details"]["clock"]
+            if (source_clock["producer_id"], source_clock["epoch"]) != (clock["producer_id"], clock["epoch"]) or source_clock["monotonic_ns"] > clock["monotonic_ns"]:
+                self.last_book_result = "SOURCE_CLOCK_UNMAPPED"
+                return output
+            observation_ns = source_clock["monotonic_ns"]
+        if execution_book_issues(message) or payload["update_kind"] != "BOOK" or payload["market_status"] != "CONTINUOUS" or not book or book["sync_status"] != "SYNCED":
             self.last_book_result = "UNUSABLE_BOOK"
             return output
         if utc_us(at) - received >= self.parameters["max_quote_age_ms"] * 1000:
@@ -209,7 +218,7 @@ class PaperBroker:
             if not order["active"] or order["instrument_id"] != instrument or amount(order["filled"]) == amount(order["quantity"]):
                 continue
             # A delayed/cached pre-command observation can never become a fill.
-            if received <= utc_us(order["claim_at"]) or received < utc_us(order["arrival_at"]) or clock["monotonic_ns"] <= order["claim_clock"]["monotonic_ns"] or clock["monotonic_ns"] < order["arrival_clock"]["monotonic_ns"]:
+            if received <= utc_us(order["claim_at"]) or received < utc_us(order["arrival_at"]) or observation_ns <= order["claim_clock"]["monotonic_ns"] or observation_ns < order["arrival_clock"]["monotonic_ns"]:
                 continue
             side = "asks" if order["side"] == "BUY" else "bids"
             for price, _ in levels[side]:
