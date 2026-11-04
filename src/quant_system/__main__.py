@@ -22,6 +22,15 @@ def main(argv=None):
     demo = sub.add_parser("demo")
     demo.add_argument("--output-dir", required=True)
     demo.add_argument("--config")
+    market = sub.add_parser("market-ingest", help="Normalize a callback JSONL spool into a new run")
+    market.add_argument("--input", required=True)
+    market.add_argument("--database", required=True)
+    market.add_argument("--run-id", required=True)
+    market.add_argument("--config", required=True)
+    market.add_argument("--manifest")
+    market.add_argument("--follow", action="store_true")
+    market.add_argument("--seconds", type=float, default=60)
+    market.add_argument("--simulate-clock", action="store_true")
     args = parser.parse_args(argv)
     if args.command == "environment":
         result = environment_report(probe_kiwoom=args.probe_kiwoom)
@@ -33,6 +42,10 @@ def main(argv=None):
             result = store.backup(args.destination)
     elif args.command == "demo":
         result = run_demo(args.output_dir, decode(Path(args.config).read_bytes()) if args.config else None)
+    elif args.command == "market-ingest":
+        from .market.cli import ingest_file
+        result = ingest_file(args.input, args.database, args.run_id, decode(Path(args.config).read_bytes()), manifest_path=args.manifest,
+                             follow=args.follow, seconds=args.seconds, simulate_clock=args.simulate_clock)
     else:
         session = ReplaySession(decode(Path(args.manifest).read_bytes()))
         result = {"trace": session.play(target_run_id=args.run_id), "trace_sha256": session.trace_digest(target_run_id=args.run_id)}

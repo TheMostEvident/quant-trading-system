@@ -66,3 +66,17 @@ PR #30과 Issue #2의 범위·계약, PR #31의 공통 기반 설계는 main에 
 | D-023 | 재생은 전달별 health 이력과 참조 view 보존 | 마지막 health로 과거 모든 입력을 다시 표시하지 않음 |
 
 상세 규칙은 [공통 기반 설계](foundation-design.md), 기대 결과와 구현 후 검증은 [검증 계획](foundation-validation-plan.md)을 따른다.
+
+## Issue #4 수집 구현·검증 분리 (2026-11-04)
+
+| ID | 선택 | 근거·경계 |
+| --- | --- | --- |
+| D-024 | Windows/OCX 현장 검증을 Extra Issue 1 #33으로 분리 | #3 코어는 PR #32로 병합·종료; 미실행 환경을 통과로 바꾸지 않음 |
+| D-025 | OCX GUI callback → bounded 메모리 큐 → 로컬 append-only JSONL → 별도 코어 tailer | GUI 스레드에서 필드 추출만 하고 파일 fsync·SQLite 처리 분리; spool/follow와 health sidecar로 같은 호스트의 프로세스 경계 구성 |
+| D-026 | 첫 파서는 국내 지수선물 top-5 callback만 처리 | guide 1.7 §8.5/8.6을 구현 근거로 삼음; 실제 설치 명세·첫 코드/월물·구독 방식은 #33 확인 |
+| D-027 | 원천 사건 UTC·native ID·공급자 sequence를 추정하지 않음 | HHMMSS는 raw에 보존; trading date는 명시적 프로필; 자정/역행은 epoch 재확인 전 차단 |
+| D-028 | 모의 로그인 확인 후 시세 함수만 호출 | controller/Qt port에 주문·계좌·잔고 API 없음; 인증은 사용자 PC 공식 창에서 수행 |
+| D-029 | 실제 프로필의 상품·거래 상태 검증 플래그는 기본 false | 주식의 장 상태 코드와 선물의 상태 범위를 동일시하지 않음; 설치 명세/현장 증거 전 market_status=UNKNOWN |
+| D-030 | 재시작은 새 run과 연결·상태·모든 선택 상품의 새 full snapshot으로 시작 | 과거 정상 book을 부활시키지 않음; 공급자 무손실/완전 순서를 보장하는 resync는 아님 |
+
+구현과 시험·실행 조건은 [수집 안내](kiwoom-feed.md), 테스트 근거는 [기계 판독 결과](verification/kiwoom-20261104.json)를 따른다.
