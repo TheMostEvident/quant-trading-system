@@ -258,7 +258,9 @@ class FeatureEngine:
                     smoothing = self.config["smoothing"]
                     alpha = (-math.expm1(-delta_ns / (smoothing["tau_ms"] * 1_000_000))
                              if smoothing["method"] == "TIME_EMA" else smoothing["alpha"])
-                    smooth = state.book.smooth + alpha * (obi - state.book.smooth)
+                    # alpha=1 is exactly the current observation. Avoid the
+                    # cancellation error that could cross a policy boundary.
+                    smooth = obi if alpha == 1 else state.book.smooth + alpha * (obi - state.book.smooth)
                     raw_delta, smooth_delta = obi - state.book.obi, smooth - state.book.smooth
                     details.update(obi_delta_per_observation=raw_delta, smooth_obi_delta_per_observation=smooth_delta)
                     if delta_ns:

@@ -36,6 +36,9 @@ def main(argv=None):
     feature_check.add_argument("manifest")
     feature_check.add_argument("--run-id", default="feature-replay")
     feature_check.add_argument("--speed", type=float, default=1)
+    signals = sub.add_parser("signal-scenario", help="Evaluate fixed-policy targets from explicit offline inputs; no orders")
+    signals.add_argument("scenario")
+    signals.add_argument("--output-dir")
     args = parser.parse_args(argv)
     if args.command == "environment":
         result = environment_report(probe_kiwoom=args.probe_kiwoom)
@@ -55,6 +58,9 @@ def main(argv=None):
     elif args.command == "verify-features":
         from .market.feature_replay import verify_feature_replay
         result = verify_feature_replay(decode(Path(args.manifest).read_bytes()), target_run_id=args.run_id, speed=args.speed)
+    elif args.command == "signal-scenario":
+        from .strategy.scenario import run_scenario
+        result = run_scenario(args.scenario, output_dir=args.output_dir)
     else:
         session = ReplaySession(decode(Path(args.manifest).read_bytes()))
         result = {"trace": session.play(target_run_id=args.run_id), "trace_sha256": session.trace_digest(target_run_id=args.run_id)}

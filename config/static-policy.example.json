@@ -1,0 +1,78 @@
+{
+  "schema_version": "0.2.0",
+  "message_type": "TradingPolicy",
+  "message_id": "tp-fut-1",
+  "run_id": "demo-fut-20261104",
+  "instrument_id": "SIM:KR-FUT1",
+  "source": "static-policy",
+  "source_event_id": null,
+  "event_at": null,
+  "received_at": "2026-11-04T00:00:00.000000Z",
+  "ready_at": "2026-11-04T00:00:00.000000Z",
+  "data_origin": "SYNTHETIC",
+  "quality_flags": [],
+  "lineage": [],
+  "payload": {
+    "policy_id": "policy-fut-1",
+    "provider_kind": "STATIC",
+    "provider_epoch": "demo-epoch-1",
+    "revision": 1,
+    "account_id": "paper-fut",
+    "instrument_spec_ref": "spec-fut-v1",
+    "universe_ref": "u-fut-1",
+    "valid_from": "2026-11-04T00:00:00.000000Z",
+    "expires_at": "2026-11-04T00:01:00.000000Z",
+    "allowed_position_directions": [
+      "LONG",
+      "SHORT"
+    ],
+    "target_position_qty": "2",
+    "entry": {
+      "obi_long": 0.6,
+      "obi_short": -0.6,
+      "slope_min_per_second": null,
+      "min_observations": 3,
+      "min_duration_ms": 200,
+      "max_observation_gap_ms": 500
+    },
+    "hold_exit": {
+      "long_hold_obi": 0.2,
+      "short_hold_obi": -0.2,
+      "max_hold_ms": 30000,
+      "exit_target_qty": "0",
+      "emergency_rule_ref": "futures-emergency-demo-v1"
+    },
+    "smoothing": {
+      "method": "EVENT_EMA",
+      "tau_ms": null,
+      "alpha": 1
+    },
+    "execution_limits": {
+      "max_order_notional": {
+        "asset": "KRW",
+        "amount": "300000"
+      },
+      "max_position_qty": "2",
+      "max_initial_margin": {
+        "asset": "KRW",
+        "amount": "50000"
+      },
+      "max_spread_ticks": 2,
+      "max_quote_age_ms": 1000,
+      "order_ttl_ms": 1000,
+      "max_retries": 0,
+      "max_slippage_ticks": 1,
+      "price_reference_mode": "AT_INTENT_CREATION",
+      "price_reference_ref": null
+    },
+    "risk_budget_ref": "risk-fut-v1",
+    "regime": null,
+    "rationale": "PLUMBING_TEST_ONLY",
+    "input_refs": [
+      "u-fut-1"
+    ],
+    "strategy_version": "static-obi-v1",
+    "feature_config_ref": "feature-config",
+    "state_max_age_ms": 5000
+  }
+}

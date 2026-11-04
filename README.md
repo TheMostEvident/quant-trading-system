@@ -2,7 +2,7 @@
 
 Research and development of a layered quantitative trading system.
 
-현재는 **공통 기반과 Layer 1 수집·미시구조 지표의 구현·합성 검증 단계**다. 키움 callback 보존·정규화·품질 감시·재생에 OBI·관측 OFI·EMA·시간 변화율을 연결했다. Windows/OCX 실제 실행·피드 검증은 [Extra Issue 1 #33](https://github.com/TheMostEvident/quant-trading-system/issues/33)에서 진행한다.
+현재는 **공통 기반과 Layer 1 수집·지표·고정 정책 신호의 구현·합성 검증 단계**다. 키움 callback 보존·정규화·지표 계산에 이어 고정 정책의 진입·유지·청산 목표와 필터를 오프라인으로 평가한다. Windows/OCX 실제 실행·피드 검증은 [Extra Issue 1 #33](https://github.com/TheMostEvident/quant-trading-system/issues/33)에서 진행한다.
 
 ## 실행
 
@@ -35,7 +35,7 @@ quant-foundation replay data/market.manifest.json --run-id market-replay
 python tools/benchmark_market.py --events 200
 ```
 
-같은 원천 callback을 재전달한 경우와 내용이 같은 별개 관측을 구별한다. BOOK는 상위 5단계의 독립 관측이며 TRADE/STATUS는 이전 book을 복사하지 않는다. 원천 sequence·native event ID·정확한 사건 UTC를 확인하지 못한 값은 null과 품질 플래그로 남긴다. 매매 신호·주문은 후속 Issue 범위다.
+같은 원천 callback을 재전달한 경우와 내용이 같은 별개 관측을 구별한다. BOOK는 상위 5단계의 독립 관측이며 TRADE/STATUS는 이전 book을 복사하지 않는다. 원천 sequence·native event ID·정확한 사건 UTC를 확인하지 못한 값은 null과 품질 플래그로 남긴다. 실제 소비자·주문 연결은 후속 Issue 범위다.
 
 [수집기 실행·검증 안내](docs/kiwoom-feed.md)에 PR #34 당시 **83개 테스트(기존 45 + 수집 경로 38)**와 남은 실제 환경 검증을 정리했다. 코어는 stdlib만 사용하고 Windows bridge의 PyQt5 의존성은 별도 설치한다.
 
@@ -49,7 +49,18 @@ quant-foundation verify-features data/features.manifest.json --run-id features-r
 quant-foundation verify-features data/features.manifest.json --run-id features-replay --speed 1000
 ```
 
-`verify-features`는 저장된 정규화 입력과 원천 수신 시계로 지표를 새로 계산하고 캐시와 대조한다. **125개 테스트(기존 83 + 지표 42)**, 손계산 표·정의·단위·시간창·재생 조건은 [미시구조 지표 안내](docs/microstructure-features.md)를 따른다. 계산식 검증과 실제 피드의 적합성 검증(#33)은 별개이며 현재 거래 신호나 주문을 생성하지 않는다.
+`verify-features`는 저장된 정규화 입력과 원천 수신 시계로 지표를 새로 계산하고 캐시와 대조한다. PR #35 당시 **125개 테스트(기존 83 + 지표 42)**, 손계산 표·정의·단위·시간창·재생 조건은 [미시구조 지표 안내](docs/microstructure-features.md)를 따른다. 계산식 검증과 실제 피드의 적합성 검증(#33)은 별개다.
+
+## 고정 정책 신호와 필터
+
+```bash
+quant-foundation signal-scenario tests/fixtures/static-policy.synthetic.json --output-dir data/signals
+quant-foundation signal-scenario data/signals/inputs.json
+```
+
+`STATIC` 정책·N회와 경과시간·진입/유지 히스테리시스·만료·상품/계좌 capability·수량/명목가치/증거금 조건으로 signed **총 목표 수량**을 제안한다. 신호가 실제 보유를 바꾸지 않으며, 반전은 기존 포지션의 flat 확인 후 다시 평가한다. 현물은 보유 재고의 명시적 감소·청산만 지원한다. 오프라인 bundle 실행이며 실제 수집 구독·OMS/원장은 후속 범위다.
+
+[실행·입력·경계·위험·제한](docs/static-policy.md)과 [예제 정책](config/static-policy.example.json), [고정 예상 시나리오](tests/fixtures/static-policy-expected.json)를 제공한다. **현재 198개 테스트(기존 125 + 정책 73)**를 독립 설치 환경에서 검증하며 결과는 [검증 JSON](docs/verification/policy-20261104.json)에 기록한다. Layer 2 예측이나 최종 매매 파라미터 선정은 포함하지 않는다.
 
 ## 거래 범위와 첫 연결
 

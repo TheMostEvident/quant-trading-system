@@ -1,0 +1,55 @@
+{
+  "description": "Independent fixed worksheet: action / signed total target / supplied holdings; external position fixtures at 350ms and 650ms, never inferred fills.",
+  "expected": [
+    [
+      "WAIT",
+      null,
+      "0"
+    ],
+    [
+      "WAIT",
+      null,
+      "0"
+    ],
+    [
+      "ENTER",
+      "2",
+      "0"
+    ],
+    [
+      "WAIT",
+      null,
+      "0"
+    ],
+    [
+      "HOLD",
+      "2",
+      "2"
+    ],
+    [
+      "EXIT",
+      "0",
+      "2"
+    ],
+    [
+      "EXIT",
+      "0",
+      "2"
+    ],
+    [
+      "WAIT",
+      null,
+      "0"
+    ],
+    [
+      "WAIT",
+      null,
+      "0"
+    ],
+    [
+      "ENTER",
+      "-2",
+      "0"
+    ]
+  ]
+}

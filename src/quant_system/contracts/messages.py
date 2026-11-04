@@ -7,6 +7,7 @@ from decimal import Decimal
 from quant_system.foundation.errors import ValidationError
 from quant_system.foundation.values import decimal_value, encode, utc_us
 from .microstructure import validate_microstructure
+from .static_policy import validate_static_policy
 
 CONTRACT_VERSION = "0.2.0"
 MESSAGE_TYPES = frozenset({"MarketSnapshot", "ExecutionReport", "AccountState", "PositionState", "EventPacket", "UniverseSnapshot", "TradingPolicy"})
@@ -232,6 +233,8 @@ def _validate_message(m: dict) -> None:
         _require(lim["price_reference_mode"] in ("AT_INTENT_CREATION", "FIXED_REFERENCE"), "Unknown price anchor")
         if lim["price_reference_mode"] == "FIXED_REFERENCE":
             _text(lim["price_reference_ref"])
+        if "strategy_version" in p:
+            validate_static_policy(p)
 
 
 def validate_message(message: dict) -> None:

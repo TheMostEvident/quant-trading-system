@@ -1,4 +1,4 @@
 # Build tools used for the verified wheel. Runtime and unittest use only stdlib.
 # Version pins, not a platform-independent or hash-locked Python/SQLite build.
-setuptools==84.1.0
+setuptools==84.2.1
 wheel==0.48.0
