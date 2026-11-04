@@ -60,6 +60,8 @@ fixture는 raw 9건 → MarketSnapshot 10건이다. 연결·상태·top-5 book·
 
 ## Windows 실행 순서 (#33)
 
+PR #41 이후 필수 callback 0건 진단과 남은 1~5 검증은 [Windows 현장 검증 절차](windows-field-validation.md)를 따른다. 초기 TR과 필터 전 type 집계, 고정 프로필, bridge/core 동시 실행, 원본/DB/manifest 및 지표 재계산 대조, 두 run의 중단/재시작 검사 명령을 제공한다.
+
 1. Windows에서 core 환경의 실제 Python/SQLite 버전을 확인하고 전체 테스트를 실행한다. 원래 45개 공통 기반 시험을 Windows에서 통과했는지 별도로 기록한다.
 
 ```powershell

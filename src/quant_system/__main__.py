@@ -42,7 +42,29 @@ def main(argv=None):
     oms = sub.add_parser("oms-scenario", help="Process explicit synthetic OMS inputs and persist accounting; no broker transport")
     oms.add_argument("scenario")
     oms.add_argument("--output-dir", required=True)
+    profile_draft = sub.add_parser("market-profile-draft", help="Create an unverified observed profile; never enables the input gate")
+    profile_draft.add_argument("--template", default="config/kiwoom.observed.example.json")
+    profile_draft.add_argument("--code", required=True)
+    profile_draft.add_argument("--trading-date", required=True)
+    profile_draft.add_argument("--output", required=True)
+    review = sub.add_parser("review-market-profile", help="List missing public instrument/session verification evidence")
+    review.add_argument("profile")
+    audit = sub.add_parser("audit-market-session", help="Cross-check raw capture, collector report, DB and replay; no API calls")
+    audit.add_argument("directory")
+    audit.add_argument("--previous-session")
+    audit.add_argument("--fsync-budget-ms", type=float, default=1000)
+    audit.add_argument("--output", required=True)
+    field = sub.add_parser("market-field-run", help="User-host Windows mock capture plus concurrent core follow and field audit")
+    field.add_argument("--bridge-python", required=True)
+    field.add_argument("--profile", required=True)
+    field.add_argument("--output-dir", required=True)
+    field.add_argument("--seconds", type=int, default=120)
+    field.add_argument("--max-market-events", type=int, default=500)
+    field.add_argument("--without-initial-tr", action="store_true")
+    field.add_argument("--fsync-budget-ms", type=float, default=1000)
+    field.add_argument("--previous-session")
     args = parser.parse_args(argv)
+    exit_code = 0
     if args.command == "environment":
         result = environment_report(probe_kiwoom=args.probe_kiwoom)
     elif args.command == "integrity":
@@ -67,11 +89,31 @@ def main(argv=None):
     elif args.command == "oms-scenario":
         from .execution.scenario import run_scenario
         result = run_scenario(args.scenario, args.output_dir)
+    elif args.command == "market-profile-draft":
+        from .market.field_run import make_profile, write_new_json
+        result = make_profile(decode(Path(args.template).read_bytes()), args.code, args.trading_date)
+        write_new_json(args.output, result)
+    elif args.command == "review-market-profile":
+        from .market.verification import profile_review, load_json
+        result = profile_review(load_json(args.profile))
+        exit_code = 0 if result["ready_for_field_validation"] else 2
+    elif args.command == "audit-market-session":
+        from .market.verification import audit_session
+        from .market.field_run import write_new_json
+        result = audit_session(args.directory, fsync_budget_ms=args.fsync_budget_ms, previous_directory=args.previous_session)
+        write_new_json(args.output, result)
+        exit_code = 0 if result["field_checks_passed"] else 2
+    elif args.command == "market-field-run":
+        from .market.field_run import run_field_session
+        result = run_field_session(args.bridge_python, decode(Path(args.profile).read_bytes()), args.output_dir,
+                                   seconds=args.seconds, max_market_events=args.max_market_events, bootstrap_tr=not args.without_initial_tr,
+                                   fsync_budget_ms=args.fsync_budget_ms, previous_directory=args.previous_session)
+        exit_code = 0 if result["field_checks_passed"] else 2
     else:
         session = ReplaySession(decode(Path(args.manifest).read_bytes()))
         result = {"trace": session.play(target_run_id=args.run_id), "trace_sha256": session.trace_digest(target_run_id=args.run_id)}
     print(encode(result).decode())
-    return 0
+    return exit_code
 
 
 if __name__ == "__main__":

@@ -7,6 +7,8 @@ import threading
 import time
 from pathlib import Path
 
+from .latency import LatencyHistogram
+
 
 class CallbackSpool:
     def __init__(self, path, *, max_items=1000, max_bytes=8 * 1024 * 1024, max_frame_bytes=65536):
@@ -23,6 +25,7 @@ class CallbackSpool:
         self.pending_bytes = 0
         self.healthy = True
         self.metrics = {"enqueued": 0, "fsynced": 0, "dropped": 0, "high_water_items": 0, "high_water_bytes": 0, "max_enqueue_to_fsync_ms": 0.0}
+        self.latency = LatencyHistogram()
         self.error = None
         self._health()
         self.thread = threading.Thread(target=self._write, name="kiwoom-spool-writer", daemon=True)
@@ -31,7 +34,7 @@ class CallbackSpool:
     def _health(self):
         # An independent path remains available when the data queue is full.
         # If the disk itself fails the reader's heartbeat timeout is the gate.
-        value = {"healthy": self.healthy, "error": self.error, "metrics": dict(self.metrics)}
+        value = {"healthy": self.healthy, "error": self.error, "metrics": dict(self.metrics), "enqueue_to_fsync_latency": self.latency.summary()}
         temporary = Path(str(self.health_path) + ".tmp")
         temporary.write_text(json.dumps(value, sort_keys=True), encoding="utf-8")
         os.replace(temporary, self.health_path)
@@ -69,7 +72,9 @@ class CallbackSpool:
                 with self.lock:
                     self.pending_bytes -= len(raw)
                     self.metrics["fsynced"] += 1
-                    self.metrics["max_enqueue_to_fsync_ms"] = max(self.metrics["max_enqueue_to_fsync_ms"], (time.monotonic_ns() - enqueued_at) / 1_000_000)
+                    elapsed = (time.monotonic_ns() - enqueued_at) / 1_000_000
+                    self.metrics["max_enqueue_to_fsync_ms"] = max(self.metrics["max_enqueue_to_fsync_ms"], elapsed)
+                    self.latency.record(elapsed)
                 self.queue.task_done()
             self.output.close()
             with self.lock:
@@ -91,4 +96,4 @@ class CallbackSpool:
             self.healthy = False
             self.error = "CALLBACK_SPOOL_DRAIN_TIMEOUT"
             raise RuntimeError(self.error)
-        return {"healthy": self.healthy, **self.metrics, "error": self.error}
+        return {"healthy": self.healthy, **self.metrics, "error": self.error, "enqueue_to_fsync_latency": self.latency.summary()}
