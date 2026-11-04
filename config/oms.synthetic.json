@@ -1,0 +1,37 @@
+{
+  "model": "synthetic-fifo-v1",
+  "data_origin": "SYNTHETIC",
+  "ready_at": "2026-11-04T00:00:00.000000Z",
+  "run_id": "demo-fut-20261104",
+  "account_id": "paper-fut",
+  "execution_scope": "synthetic-broker/session-1",
+  "ledger_model": "FUTURES_MARGIN",
+  "valuation_asset": "KRW",
+  "balances": {
+    "KRW": "1000000"
+  },
+  "margin_rule_ref": "synthetic-margin-v1",
+  "max_gross_notional": "5000000",
+  "instruments": {
+    "SIM:KR-FUT1": {
+      "asset_class": "FUTURE",
+      "quantity_unit": "CONTRACT",
+      "price_unit": "INDEX_POINT",
+      "qty_step": "1",
+      "min_qty": "1",
+      "contract_multiplier": "1000",
+      "pnl_asset": "KRW",
+      "quote_asset": "KRW",
+      "base_asset": null,
+      "tick_size": "0.1",
+      "position_mode": "NET",
+      "pnl_model": "LINEAR",
+      "can_open_long": true,
+      "can_open_short": true,
+      "margin_rule_ref": "synthetic-margin-v1",
+      "initial_per_contract": "20000",
+      "maintenance_per_contract": "15000",
+      "instrument_spec_ref": "spec-fut-v1"
+    }
+  }
+}

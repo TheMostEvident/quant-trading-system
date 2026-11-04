@@ -149,6 +149,13 @@ OBI와 OFI는 같은 상품의 동일 수량 단위 안에서 계산한다. 순�
 }
 ```
 
+Issue #7의 오프라인 실행 코어는 아래 v0.2 필드를 유지한다. 합성 FILL에는 원천 순서가
+명시된 `last_fill.executed_at`, `last_fill.execution_sequence`,
+`last_fill.clock={producer_id,epoch,monotonic_ns}`를 추가로 요구한다. 기존 봉투/fixture의
+읽기·검증은 바꾸지 않으며 실제 adapter가 이 값을 제공한다고 추정하지 않는다.
+미상·지원하지 않는 정정은 격리하고 대조하며, 현재 지원하는 BUST의 correction_of는
+확인한 fill_key다. [OMS의 식별·순서·정정 경계](oms-ledger.md)를 따른다.
+
 ## 6. AccountState
 
 현재 계좌·자산·증거금의 권위 있는 단일 버전이다. 포지션·정책의 account_state_ref가 이 메시지를 참조한다.
@@ -214,6 +221,12 @@ OBI와 OFI는 같은 상품의 동일 수량 단위 안에서 계산한다. 순�
 ```
 
 계좌 평가자산은 AccountState의 장부·평가 근거로 계산한다. 이미 현금에 반영한 비용이나 정산금에 PositionState의 누계 비용·손익을 다시 가감하지 않는다.
+
+Issue #7의 synthetic-fifo-v1 projection은 실제 입력된 체결에만 수량을 반영한다.
+PositionState payload에 선택적 `first_fill_ref`, `first_fill_clock`을 추가해 최초 체결
+기산점을 보존한다. AccountState와 각 PositionState는 같은 account_state_ref/원장 버전을
+공유하며 미체결·미확인 취소는 actual net_qty와 별도의 예약으로 표현한다.
+FIFO·고정 계약당 증거금은 합성 fixture 규칙이며 실제 브로커 장부와 동일하다고 주장하지 않는다.
 
 ## 8. EventPacket
 

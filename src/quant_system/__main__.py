@@ -39,6 +39,9 @@ def main(argv=None):
     signals = sub.add_parser("signal-scenario", help="Evaluate fixed-policy targets from explicit offline inputs; no orders")
     signals.add_argument("scenario")
     signals.add_argument("--output-dir")
+    oms = sub.add_parser("oms-scenario", help="Process explicit synthetic OMS inputs and persist accounting; no broker transport")
+    oms.add_argument("scenario")
+    oms.add_argument("--output-dir", required=True)
     args = parser.parse_args(argv)
     if args.command == "environment":
         result = environment_report(probe_kiwoom=args.probe_kiwoom)
@@ -61,6 +64,9 @@ def main(argv=None):
     elif args.command == "signal-scenario":
         from .strategy.scenario import run_scenario
         result = run_scenario(args.scenario, output_dir=args.output_dir)
+    elif args.command == "oms-scenario":
+        from .execution.scenario import run_scenario
+        result = run_scenario(args.scenario, args.output_dir)
     else:
         session = ReplaySession(decode(Path(args.manifest).read_bytes()))
         result = {"trace": session.play(target_run_id=args.run_id), "trace_sha256": session.trace_digest(target_run_id=args.run_id)}

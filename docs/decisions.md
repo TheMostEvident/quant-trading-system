@@ -109,3 +109,19 @@ PR #30과 Issue #2의 범위·계약, PR #31의 공통 기반 설계는 main에 
 | D-045 | CLI는 가용 시점이 선언된 오프라인 bundle 평가 | 실제 t/W/D 소비자 연결·시계 매핑·원장/브로커 인증은 후속; #33 실피드 검증을 대체하지 않음 |
 
 정의·경계·198개 시험과 설치 결과는 [고정 정책](static-policy.md)과 [검증 JSON](verification/policy-20261104.json)을 따른다.
+
+## Issue #7 주문 상태·원장 (2026-11-04)
+
+| ID | 선택 | 근거·경계 |
+| --- | --- | --- |
+| D-046 | raw-first 뒤 OMS receipt·projection·command queue를 한 transaction에 commit | 단일 writer/WAL/FULL 재사용; 미커밋 강제 종료에서 예약/command 유출 금지 |
+| D-047 | 전송 전에 command를 한 번 claim하고 결과 불명 시 재전송하지 않음 | 외부 exactly-once 보장이 아니며 broker 대조 후 복구 |
+| D-048 | 취소 ACK 뒤에도 예약을 유지하고 전체 snapshot/watermark로 종료 대조 | 지연 체결·취소 경합·과도한 재청산/반전을 방지; 실제 complete/quiesced provider는 후속 검증 |
+| D-049 | fill 식별자와 전체 상세만으로 수량/자산에 반영 | 누적 숫자로 미상 체결을 만들지 않음; 역순/누락·conflict는 보존·대조 |
+| D-050 | synthetic-fifo-v1의 exact lot·현금/증거금/정산/미정산손익 분리 | 평균 표시값으로 현금을 계산하지 않음; 실제 브로커 회계/반올림·증거금은 미확인 |
+| D-051 | 자산별 비용·현물 순재고와 CASH 원장을 분리 | BASE_ASSET 소수 비용·rebate 보존, 암묵 FX·선물 숏/margin을 현물에 적용하지 않음 |
+| D-052 | signal 연결은 선언한 t/W/D 입력과 최신 유효 policy/book을 요구 | 과거 정상 정책·호가 부활 차단; direct TARGET은 합성 bundle API |
+| D-053 | 알려진 BUST만 반대 분개 delta와 영향을 받는 lot/정산 재계산으로 처리 | 과거 receipt는 불변; 다른 정정은 격리하고 재대조 |
+| D-054 | 브로커 전송과 자동 체결 생성은 구현하지 않음 | OMS/원장 코어 검증과 #8 모의 집행·#33 실제 환경을 분리 |
+
+정의·상태·한계·282개 검증은 [OMS 안내](oms-ledger.md)와 [검증 JSON](verification/oms-20261104.json)을 따른다.
