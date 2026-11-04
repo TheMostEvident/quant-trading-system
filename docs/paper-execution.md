@@ -21,7 +21,7 @@
 - 설정한 양의 주문 지연 뒤에 주문이 도착한다. 별도 통보 지연이 지난 ACK/FILL/CANCEL_ACK만 OMS가 알 수 있다. 체결 시각과 통보 이용 가능 시각을 구별한다.
 - 체결은 **주문 claim보다 엄격히 늦고 주문 도착 이후 수신된 새 관측**에서만 발생한다. 캐시된 이전 호가가 늦게 전달돼도 체결하지 않는다. 동일 시점 중간가격, 오래된 decision quote, timer만으로 체결하지 않는다.
 - 매수는 ask, 매도는 bid를 가격순으로 소진한다. 부분체결은 각 level 가격별 별도 fill이다. 추가 불리한 tick 이동을 적용한 가격도 원래 지정가 안에 있어야 한다.
-- UNKNOWN/HALTED/UNSYNCED, 품질 플래그, stale, 다른 run/origin/spec 또는 잘못된 tick/정수 수량/깊이는 체결에 사용할 수 없다. clock domain 변경·시간 역행·UTC/monotonic 불일치는 실행을 중단한다.
+- UNKNOWN/HALTED/UNSYNCED, 차단 대상·미지의 품질 flag, stale, 다른 run/origin/spec 또는 잘못된 tick/정수 수량/깊이는 체결에 사용할 수 없다. clock domain 변경·시간 역행·UTC/monotonic 불일치는 실행을 중단한다.
 - 취소는 별도 지연 뒤 도착한다. 그 이전 관측에서는 체결할 수 있다. 동일 시각이면 도착/취소/만기 처리를 먼저 하고 호가를 본다. 취소 전에 전량 체결되면 CANCEL_REJECT다. 부분 취소/만기 후의 예약 해제·대조 보수성은 #7 그대로다.
 - 계약별 명시적 합성 만기에 남은 주문은 EXPIRE이고 만기 후 도착한 신규 주문은 REJECT다. 다른 월물의 호가로 기존 월물 주문을 체결하지 않는다. 실제 만기 달력이나 자동 롤오버 규칙을 추정하지 않는다.
 
@@ -42,6 +42,8 @@ top-five snapshot만으로 실제 지정가 대기열, 취소/재추가 물량, 
 첫 실행 모드는 SYNTHETIC_REPLAY, 상품 범위는 명시적 CONTRACT/NET 선형 선물이다. OBSERVED 원천을 라벨만 바꿔 투입하지 않는다. 실제 원천과 합성 체결을 함께 보존하는 recorded/shadow 연결, 현물의 소수 수량·수수료 자산별 집행 모형, 실제 계좌 대조 provider는 후속 범위다. 기존 현물 원장 지원이 현물 집행 모형 완료를 뜻하지 않는다.
 
 ## 저장과 재생
+
+#9 통합 검증은 [독립 검증 안내](layer1-verification.md)를 따른다. SYNTHETIC 경로에서만 SOURCE_TIME_UNKNOWN/SOURCE_SEQUENCE_UNAVAILABLE/SOURCE_EVENT_ID_UNAVAILABLE 세 정보성 경고를 보존하면서 차단 사유와 구분한다. 실제 원천은 실행하지 않으며 STALE/GAP/미검증 상태·미지 flag는 계속 차단한다. source 지표의 clock domain을 기존 주문 clock으로 추정하지 않는다.
 
 각 paper input을 먼저 raw capture로 저장한다. 시장 관측과 가정은 artifact로 보존하고, 생성 report는 #7의 raw-first/원자적 receipt·projection 경로로 적용한다. command claim을 남기기 전에 모의 주문을 전달하지 않는다. 외부 REPORT/RECONCILE 입력으로 모의 체결을 주입하는 것은 이 runner에서 거부한다.
 

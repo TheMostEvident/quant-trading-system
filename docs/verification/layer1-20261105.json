@@ -1,0 +1,415 @@
+{
+  "scope": "Independent synthetic Layer 1 integration, economic replay, model bounds and fault/risk validation; not live/field acceptance",
+  "base_commit": "12927f34b34d116ce81e9ff4f7ba143875678bee",
+  "base_tree": "f12e67dc8373fc962f8d16800abb7950da6b738d",
+  "baseline_blob_comparison": {
+    "files": 96,
+    "mismatches": 0
+  },
+  "environment": {
+    "os": "Linux",
+    "process_bits": 64,
+    "python": "3.12.14",
+    "sqlite": "3.53.1"
+  },
+  "source_tests": {
+    "command": "PYTHONPATH=src python -m unittest discover -s tests -q",
+    "discovered": 384,
+    "passed": 384,
+    "skipped": 0,
+    "seconds": 18.137
+  },
+  "installed_tests": {
+    "command": "env -u PYTHONPATH <isolated-venv>/bin/python -m unittest discover -s tests -q",
+    "discovered": 384,
+    "passed": 384,
+    "skipped": 0,
+    "seconds": 17.454,
+    "note": "Core imported installed wheel; source fixture files and standalone collector wrapper remain test inputs"
+  },
+  "new_tests": 41,
+  "standalone_verifier": {
+    "scope": "synthetic L1 integration/reference/fault tests; no field acceptance",
+    "tests": 41,
+    "successful": true,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "cases": [
+      {
+        "id": "test_layer1.Layer1FaultTests.test_account_notional_limit",
+        "status": "PASS",
+        "seconds": 0.449780491
+      },
+      {
+        "id": "test_layer1.Layer1FaultTests.test_delayed_book_does_not_complete_entry",
+        "status": "PASS",
+        "seconds": 0.163113457
+      },
+      {
+        "id": "test_layer1.Layer1FaultTests.test_duplicate_callback_does_not_add_observation_or_fill",
+        "status": "PASS",
+        "seconds": 0.67383241
+      },
+      {
+        "id": "test_layer1.Layer1FaultTests.test_eof_retains_pending_fill_and_reservation",
+        "status": "PASS",
+        "seconds": 0.210481412
+      },
+      {
+        "id": "test_layer1.Layer1FaultTests.test_halt_does_not_fabricate_emergency_fill",
+        "status": "PASS",
+        "seconds": 0.476281301
+      },
+      {
+        "id": "test_layer1.Layer1FaultTests.test_instrument_quantity_limit",
+        "status": "PASS",
+        "seconds": 0.480903677
+      },
+      {
+        "id": "test_layer1.Layer1FaultTests.test_margin_shortfall_does_not_resize_target",
+        "status": "PASS",
+        "seconds": 0.422482983
+      },
+      {
+        "id": "test_layer1.Layer1FaultTests.test_observed_and_unverified_profiles_stay_blocked",
+        "status": "PASS",
+        "seconds": 0.002311885
+      },
+      {
+        "id": "test_layer1.Layer1FaultTests.test_policy_expiry_blocks_entry",
+        "status": "PASS",
+        "seconds": 0.264419607
+      },
+      {
+        "id": "test_layer1.Layer1FaultTests.test_reversed_source_clock_blocks_entries",
+        "status": "PASS",
+        "seconds": 0.44390096
+      },
+      {
+        "id": "test_layer1.Layer1FaultTests.test_sequence_gap_resets_long_entry_streak",
+        "status": "PASS",
+        "seconds": 0.563702915
+      },
+      {
+        "id": "test_layer1.Layer1FaultTests.test_source_disconnect_prevents_orders",
+        "status": "PASS",
+        "seconds": 0.517929384
+      },
+      {
+        "id": "test_layer1.Layer1IntegrationTests.test_book_trade_features_and_delivery_replay_are_recomputed",
+        "status": "PASS",
+        "seconds": 0.00007307
+      },
+      {
+        "id": "test_layer1.Layer1IntegrationTests.test_cli_audit_returns_nonzero_for_bad_economics",
+        "status": "PASS",
+        "seconds": 0.162747687
+      },
+      {
+        "id": "test_layer1.Layer1IntegrationTests.test_hand_expected_end_to_end_pipeline_and_independent_ledger",
+        "status": "PASS",
+        "seconds": 0.00039771
+      },
+      {
+        "id": "test_layer1.Layer1IntegrationTests.test_previous_paper_archive_is_independently_checked",
+        "status": "PASS",
+        "seconds": 0.208463034
+      },
+      {
+        "id": "test_layer1.Layer1IntegrationTests.test_real_boundaries_declare_delivered_inputs",
+        "status": "PASS",
+        "seconds": 0.001781155
+      },
+      {
+        "id": "test_layer1.Layer1IntegrationTests.test_rehashed_projection_tamper_fails_independent_economics",
+        "status": "PASS",
+        "seconds": 0.080467076
+      },
+      {
+        "id": "test_layer1.Layer1IntegrationTests.test_saved_inputs_reproduce_state_trace_and_decisions",
+        "status": "PASS",
+        "seconds": 0.509501755
+      },
+      {
+        "id": "test_layer1.Layer1IntegrationTests.test_source_warnings_and_original_bytes_are_preserved",
+        "status": "PASS",
+        "seconds": 0.003748832
+      },
+      {
+        "id": "test_layer1.Layer1IntegrationTests.test_summary_tamper_is_detected",
+        "status": "PASS",
+        "seconds": 0.085252691
+      },
+      {
+        "id": "test_layer1.Layer1OrderFaultTests.test_account_gross_limit_includes_other_instrument",
+        "status": "PASS",
+        "seconds": 0.054163753
+      },
+      {
+        "id": "test_layer1.Layer1OrderFaultTests.test_bust_reverses_original_fill_and_costs_without_losing_raw_history",
+        "status": "PASS",
+        "seconds": 0.097067122
+      },
+      {
+        "id": "test_layer1.Layer1OrderFaultTests.test_cancel_ack_keeps_reservation_for_late_fill",
+        "status": "PASS",
+        "seconds": 0.134103991
+      },
+      {
+        "id": "test_layer1.Layer1OrderFaultTests.test_conflicting_fill_identity_blocks_new_entry",
+        "status": "PASS",
+        "seconds": 0.095095945
+      },
+      {
+        "id": "test_layer1.Layer1OrderFaultTests.test_duplicate_fill_changes_cash_and_quantity_once",
+        "status": "PASS",
+        "seconds": 0.089275556
+      },
+      {
+        "id": "test_layer1.Layer1OrderFaultTests.test_durable_claim_cannot_be_sent_twice",
+        "status": "PASS",
+        "seconds": 0.02650026
+      },
+      {
+        "id": "test_layer1.Layer1OrderFaultTests.test_journal_restart_preserves_position_and_blocks_orders",
+        "status": "PASS",
+        "seconds": 0.030230634
+      },
+      {
+        "id": "test_layer1.Layer1OrderFaultTests.test_live_order_blocks_second_order",
+        "status": "PASS",
+        "seconds": 0.025741076
+      },
+      {
+        "id": "test_layer1.Layer1OrderFaultTests.test_resume_alone_cannot_clear_disconnect",
+        "status": "PASS",
+        "seconds": 0.030750037
+      },
+      {
+        "id": "test_layer1.Layer1OrderFaultTests.test_reversal_must_close_before_opposite_target",
+        "status": "PASS",
+        "seconds": 0.027988033
+      },
+      {
+        "id": "test_layer1.Layer1OrderFaultTests.test_reversed_cumulative_reports_preserve_effective_fifo",
+        "status": "PASS",
+        "seconds": 0.032086461
+      },
+      {
+        "id": "test_layer1.Layer1OrderFaultTests.test_unknown_submission_blocks_retry_and_keeps_reservation",
+        "status": "PASS",
+        "seconds": 0.027832249
+      },
+      {
+        "id": "test_layer1.Layer1ReferenceTests.test_crypto_fractional_quantity_and_cost_assets_stay_separate",
+        "status": "PASS",
+        "seconds": 0.00043164
+      },
+      {
+        "id": "test_layer1.Layer1ReferenceTests.test_effective_fill_order_is_independent_of_arrival_order",
+        "status": "PASS",
+        "seconds": 0.000295365
+      },
+      {
+        "id": "test_layer1.Layer1ReferenceTests.test_invalid_inventory_fee_and_nondecimals_fail",
+        "status": "PASS",
+        "seconds": 0.000234824
+      },
+      {
+        "id": "test_layer1.Layer1ReferenceTests.test_late_ready_quote_cannot_hide_pre_arrival_source_clock",
+        "status": "PASS",
+        "seconds": 0.001251016
+      },
+      {
+        "id": "test_layer1.Layer1ReferenceTests.test_new_source_clock_cannot_fill_old_order",
+        "status": "PASS",
+        "seconds": 0.001037274
+      },
+      {
+        "id": "test_layer1.Layer1ReferenceTests.test_provenance_exemption_is_synthetic_and_narrow",
+        "status": "PASS",
+        "seconds": 0.000031588
+      },
+      {
+        "id": "test_layer1.Layer1ReferenceTests.test_settlement_preserves_equity_without_principal_charge",
+        "status": "PASS",
+        "seconds": 0.000360894
+      },
+      {
+        "id": "test_layer1.Layer1ReferenceTests.test_source_spec_must_equal_ledger_spec",
+        "status": "PASS",
+        "seconds": 0.000483969
+      }
+    ],
+    "field_validation": "PENDING_EXTRA_ISSUES_33_43_45"
+  },
+  "build": {
+    "setuptools": "84.2.1",
+    "wheel": "0.48.0",
+    "offline_build_and_install": true,
+    "wheel_sha256": "2191706285711d8480b904aeac64e94f1477d1389cfbc1e9a35850727bc803d9",
+    "installed_python_modules_byte_matched": 45,
+    "pip_check": "PASS"
+  },
+  "source_set": {
+    "files": 60,
+    "sha256": "cbdbbc036d11ca779682d9727b094391daac466af8dae7a90d453c2e1c1c5127",
+    "algorithm": "SHA256(concat(sorted relative *.py path UTF8, NUL, SHA256(file bytes))); excludes .git, build, __pycache__"
+  },
+  "installed_cli": {
+    "layer1_scenario": "PASS",
+    "audit_oms": "PASS",
+    "saved_input_rerun_hashes_equal": true,
+    "database_integrity": "PASS",
+    "manifest_delivery_replay": "PASS"
+  },
+  "sample_summary": {
+    "balances": {
+      "KRW": "999680"
+    },
+    "broker_network_calls": 0,
+    "commands": 3,
+    "data_origin": "SYNTHETIC",
+    "decisions": 16,
+    "decisions_sha256": "7234d9ad59b54a421008d5c7c14f56699874ed12e2b51ca2e17d306c317c32b7",
+    "faults": [],
+    "feature_recomputation": {
+      "book_features": 11,
+      "consumer_deliveries": 86,
+      "feature_messages": 12,
+      "producer_messages": 86,
+      "recomputed_sha256": "87ed95fad23c9877cd529d883d426c55552675e43121d7cf3cee6b3b7ca5cef1",
+      "target_run_id": "feature-replay",
+      "trace_sha256": "51887befd1719bfcf5ca72849b67b2cf62b539f005ba16d5e397bc2289ed6948",
+      "trade_features": 1,
+      "verified": true
+    },
+    "field_validation": "PENDING_EXTRA_ISSUES_33_43_45",
+    "generated_fills": 3,
+    "integrity": {
+      "events": 34,
+      "integrity": true,
+      "revision": 34
+    },
+    "manifest_sha256": "6435a985a9bbb17eae3b0cd154260c2a5c99406e68518b498356854be55dc10a",
+    "pending_reports": 0,
+    "positions": {
+      "SIM:KR-FUT1": "-2"
+    },
+    "replay_speed_independent": true,
+    "run_id": "layer1-synthetic",
+    "source_metrics": {
+      "duplicates": 0,
+      "gaps": 0,
+      "ignored": 0,
+      "max_normalization_ms": 3.903794,
+      "max_transport_age_ms": 0,
+      "messages": 16,
+      "quarantined": 0,
+      "raw_frames": 15
+    },
+    "state_sha256": "ff56b6e0de6aea0d8563291ad18646aaa110ffd7431500ef22fe1c7d9b463b5f",
+    "step_processing_latency": {
+      "count": 20,
+      "max_ms": 38.164224,
+      "method": "fixed-bucket-upper-bound",
+      "overflow_above_60000_ms": 0,
+      "p95_upper_ms": 50,
+      "p99_upper_ms": 50
+    },
+    "timing_scope": "local synthetic step processing, not broker latency or HFT capacity",
+    "trace_sha256": "2ca3f7cbded693d1639f334794ff0a94dc2723162c2bec1b392f18add6c076d2",
+    "valuation": {
+      "asset": "KRW",
+      "available_margin": "961480",
+      "cash_reserved": {},
+      "equity": "1001480",
+      "gross_notional": "200000",
+      "initial_used": "40000",
+      "maintenance_required": "30000",
+      "order_reserved": "0",
+      "unsettled_pnl": "1800",
+      "unvalued_assets": []
+    }
+  },
+  "independent_audit": {
+    "accepted_unique_fills": 3,
+    "audit_version": 1,
+    "checks": {
+      "accepted_fill_causality_and_limits": "PASS",
+      "database_integrity": "PASS",
+      "filled_and_reserved_quantity": "PASS",
+      "independent_available_margin": "PASS",
+      "independent_cash": "PASS",
+      "independent_equity_and_margin": "PASS",
+      "independent_matching_and_costs": "PASS",
+      "independent_positions": "PASS",
+      "input_history_binding": "PASS",
+      "intermediate_economic_trace": "PASS",
+      "manifest_binding": "PASS",
+      "manifest_delivery_replay": "PASS",
+      "projection_digest": "PASS",
+      "projection_history_binding": "PASS",
+      "summary_state_binding": "PASS",
+      "synthetic_scope": "PASS",
+      "trace_digest": "PASS"
+    },
+    "errors": [],
+    "field_validation": "PENDING_EXTRA_ISSUES",
+    "fill_ratio_by_instrument": {
+      "SIM:KR-FUT1": "1"
+    },
+    "independent_economics": {
+      "balances": {
+        "KRW": "999680"
+      },
+      "charges_by_asset": {
+        "KRW": "120"
+      },
+      "equity": "1001480",
+      "initial_used": "40000",
+      "maintenance_required": "30000",
+      "net_pnl_valuation_asset": "1480",
+      "positions": {
+        "SIM:KR-FUT1": "-2"
+      },
+      "traded_notional_by_asset": {
+        "KRW": "605600"
+      },
+      "turnover_ratio_by_asset": {
+        "KRW": "0.6056"
+      }
+    },
+    "matching": {
+      "dispatch_to_fill_latency": {
+        "count": 3,
+        "max_ms": 20,
+        "method": "fixed-bucket-upper-bound",
+        "overflow_above_60000_ms": 0,
+        "p95_upper_ms": 20,
+        "p99_upper_ms": 20
+      },
+      "scope": "synthetic matching bounds, not an independent exchange simulator"
+    },
+    "producer_faults": [],
+    "profitability_claim": false,
+    "scope": "independent synthetic economics and declared model bounds; not field acceptance",
+    "verified": true
+  },
+  "field_validation": {
+    "windows_tests_of_this_revision": "PENDING",
+    "extra_issue_1": 33,
+    "extra_issue_2": 43,
+    "extra_issue_3": 45,
+    "actual_provider_evidence": "PENDING"
+  },
+  "limitations": [
+    "Independent matching audit checks declared bounds; not a second exchange simulator",
+    "Synthetic economic audit can pass while producer faults remain; it does not release health gates",
+    "Observed/live/shadow broker execution and account reconciliation provider unsupported",
+    "CASH reference accounting checks are not cash-market strategy or matching support",
+    "Matching projection crash-resume unsupported; saved-input rerun uses a new output",
+    "No profitability, true latency or HFT capacity claim"
+  ]
+}
