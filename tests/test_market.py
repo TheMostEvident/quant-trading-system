@@ -90,7 +90,8 @@ class MarketTests(unittest.TestCase):
         self.assertEqual(len(m["payload"]["book"]["bids"]), 5)
         self.assertIsNone(m["event_at"])
         self.assertIsNone(m["source_event_id"])
-        self.assertIsNone(m["payload"]["features"])
+        self.assertEqual(m["payload"]["features"]["feature_version"], "microstructure-v1")
+        self.assertIsNone(m["payload"]["features"]["ofi_top1_delta"])
         self.assertIn("SOURCE_SEQUENCE_UNAVAILABLE", m["quality_flags"])
         self.assertTrue(self.eligible())
 

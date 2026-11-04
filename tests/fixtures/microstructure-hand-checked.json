@@ -1,0 +1,143 @@
+{
+  "origin": "SYNTHETIC",
+  "note": "Frozen arithmetic worksheet: weighted B/A=(12,10),(15,8),(9,7),(11,9); OFI=5,11,-12; half-open 1000ms window. EMA reference evaluated independently with 60-digit Decimal.exp.",
+  "weights": [
+    "1",
+    "0.5"
+  ],
+  "tau_ms": 1000,
+  "samples": [
+    {
+      "id": "a",
+      "monotonic_ns": 0,
+      "bids": [
+        {
+          "price": "100",
+          "quantity": "10"
+        },
+        {
+          "price": "99",
+          "quantity": "4"
+        }
+      ],
+      "asks": [
+        {
+          "price": "101",
+          "quantity": "6"
+        },
+        {
+          "price": "102",
+          "quantity": "8"
+        }
+      ],
+      "expected": {
+        "obi": 0.09090909090909091,
+        "smooth_obi": 0.09090909090909091,
+        "obi_slope_per_second": null,
+        "raw_obi_slope_per_second": null,
+        "ofi_top1_delta": null,
+        "ofi_window_sum": null,
+        "ofi_window_complete": false
+      }
+    },
+    {
+      "id": "b",
+      "monotonic_ns": 1000000000,
+      "bids": [
+        {
+          "price": "100",
+          "quantity": "13"
+        },
+        {
+          "price": "99",
+          "quantity": "4"
+        }
+      ],
+      "asks": [
+        {
+          "price": "101",
+          "quantity": "4"
+        },
+        {
+          "price": "102",
+          "quantity": "8"
+        }
+      ],
+      "expected": {
+        "obi": 0.30434782608695654,
+        "smooth_obi": 0.22582810346538384,
+        "obi_slope_per_second": 0.13491901255629293,
+        "raw_obi_slope_per_second": 0.2134387351778656,
+        "ofi_top1_delta": 5,
+        "ofi_window_sum": 5,
+        "ofi_window_complete": true
+      }
+    },
+    {
+      "id": "c",
+      "monotonic_ns": 1250000000,
+      "bids": [
+        {
+          "price": "101",
+          "quantity": "7"
+        },
+        {
+          "price": "100",
+          "quantity": "4"
+        }
+      ],
+      "asks": [
+        {
+          "price": "102",
+          "quantity": "3"
+        },
+        {
+          "price": "103",
+          "quantity": "8"
+        }
+      ],
+      "expected": {
+        "obi": 0.125,
+        "smooth_obi": 0.20352500593444559,
+        "obi_slope_per_second": -0.08921239012375311,
+        "raw_obi_slope_per_second": -0.717391304347826,
+        "ofi_top1_delta": 11,
+        "ofi_window_sum": 16,
+        "ofi_window_complete": true
+      }
+    },
+    {
+      "id": "d",
+      "monotonic_ns": 2000000000,
+      "bids": [
+        {
+          "price": "100",
+          "quantity": "9"
+        },
+        {
+          "price": "99",
+          "quantity": "4"
+        }
+      ],
+      "asks": [
+        {
+          "price": "101",
+          "quantity": "5"
+        },
+        {
+          "price": "102",
+          "quantity": "8"
+        }
+      ],
+      "expected": {
+        "obi": 0.1,
+        "smooth_obi": 0.14890175017574714,
+        "obi_slope_per_second": -0.07283100767826457,
+        "raw_obi_slope_per_second": -0.03333333333333333,
+        "ofi_top1_delta": -12,
+        "ofi_window_sum": -1,
+        "ofi_window_complete": true
+      }
+    }
+  ]
+}

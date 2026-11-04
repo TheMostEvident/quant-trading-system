@@ -108,6 +108,19 @@ OBI와 OFI는 같은 상품의 동일 수량 단위 안에서 계산한다. 순�
 }
 ```
 
+### 구현된 feature extension: microstructure-v1
+
+봉투와 필수 MarketSnapshot 구조는 0.2.0을 유지한다. `features.feature_version="microstructure-v1"`이면 기존 9개 특징 필드에 `config_ref`와 `details`를 추가한다. 기존 합성 `fut-obi-v1` 예시는 이력으로 유지하며 새 구현의 소비자는 지원 feature_version을 확인해야 한다.
+
+- `time_basis=RECEIVE_MONOTONIC`; details.clock에 producer/epoch/sequence/monotonic_ns/raw_ref를 보존한다.
+- `obi_slope_per_second`는 **평활 OBI**의 시간 차분이다. raw 차분과 관측당 차분은 details에 별도로 기록한다. 첫 관측·0시간 간격에서는 시간 변화율이 null이다.
+- OFI는 signed CONTRACT 정수다. snapshot 사이의 관측 OFI이며 중간에 보이지 않은 주문·취소를 복원하지 않는다.
+- config_ref는 고정된 깊이·가중치·평활화·시간창·상태 초기화 조건의 불변 artifact 참조다. basis는 현재 raw와 이전 계산 입력 메시지를 가리킨다.
+- details에 단위·범위·가중치·깊이/스프레드/중간값·관측 수·체결량 BUY/SELL/UNKNOWN·시간창 coverage/overflow를 기록한다. 가격/깊이는 decimal string, OBI/변화율은 유한 JSON number다.
+- TRADE에는 새 OBI·book 깊이/스프레드를 복사하지 않는다. STATUS와 부적격 입력의 features는 null이다. 현재 구현은 CONTRACT 수량만 지원한다.
+
+정확한 정의·필드 의미·예시·범위는 [미시구조 지표 안내](microstructure-features.md), 검증은 `contracts/microstructure.py`를 따른다. feature 계산 가능 여부와 quote 입력 gate·실제 주문 가능성은 구별한다.
+
 ## 5. ExecutionReport
 
 주문 의도·접수와 실제 체결을 구별한다. 초기 모의는 선물의 신규·청산·양방향 체결 의미를 검증한다.

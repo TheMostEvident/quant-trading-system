@@ -31,6 +31,11 @@ def main(argv=None):
     market.add_argument("--follow", action="store_true")
     market.add_argument("--seconds", type=float, default=60)
     market.add_argument("--simulate-clock", action="store_true")
+    market.add_argument("--feature-config")
+    feature_check = sub.add_parser("verify-features", help="Recompute saved features from normalized inputs and raw producer clocks")
+    feature_check.add_argument("manifest")
+    feature_check.add_argument("--run-id", default="feature-replay")
+    feature_check.add_argument("--speed", type=float, default=1)
     args = parser.parse_args(argv)
     if args.command == "environment":
         result = environment_report(probe_kiwoom=args.probe_kiwoom)
@@ -45,7 +50,11 @@ def main(argv=None):
     elif args.command == "market-ingest":
         from .market.cli import ingest_file
         result = ingest_file(args.input, args.database, args.run_id, decode(Path(args.config).read_bytes()), manifest_path=args.manifest,
-                             follow=args.follow, seconds=args.seconds, simulate_clock=args.simulate_clock)
+                             follow=args.follow, seconds=args.seconds, simulate_clock=args.simulate_clock,
+                             feature_config=decode(Path(args.feature_config).read_bytes()) if args.feature_config else None)
+    elif args.command == "verify-features":
+        from .market.feature_replay import verify_feature_replay
+        result = verify_feature_replay(decode(Path(args.manifest).read_bytes()), target_run_id=args.run_id, speed=args.speed)
     else:
         session = ReplaySession(decode(Path(args.manifest).read_bytes()))
         result = {"trace": session.play(target_run_id=args.run_id), "trace_sha256": session.trace_digest(target_run_id=args.run_id)}

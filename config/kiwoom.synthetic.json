@@ -3,7 +3,7 @@
   "data_origin": "SYNTHETIC",
   "instruments": [
     {"source_code": "SIMFUT1", "instrument_id": "SIM:KR-FUT1", "trading_date": "2026-11-04",
-     "specification": {"synthetic_only": true, "quantity_unit": "CONTRACT", "market": "SIM_DOMESTIC_INDEX_FUTURE"},
+     "specification": {"synthetic_only": true, "quantity_unit": "CONTRACT", "price_unit": "INDEX_POINT", "tick_size": "0.1", "market": "SIM_DOMESTIC_INDEX_FUTURE"},
      "spec_verified": true, "price_encoding": "SIGNED_MAGNITUDE"}
   ],
   "status_codes": {"3": "CONTINUOUS", "8": "CLOSED"},

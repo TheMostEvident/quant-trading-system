@@ -6,6 +6,7 @@ from decimal import Decimal
 
 from quant_system.foundation.errors import ValidationError
 from quant_system.foundation.values import decimal_value, encode, utc_us
+from .microstructure import validate_microstructure
 
 CONTRACT_VERSION = "0.2.0"
 MESSAGE_TYPES = frozenset({"MarketSnapshot", "ExecutionReport", "AccountState", "PositionState", "EventPacket", "UniverseSnapshot", "TradingPolicy"})
@@ -105,6 +106,8 @@ def _validate_message(m: dict) -> None:
                 if f[field] is not None:
                     _number(f[field])
             _integer(f["ofi_window_ms"])
+            if f["feature_version"] == "microstructure-v1":
+                validate_microstructure(f, p["update_kind"])
     elif kind == "ExecutionReport":
         _fields(p, ["account_id", "client_order_id", "broker_order_id", "event_type", "order_status", "side", "position_effect", "order_qty", "cum_filled_qty", "leaves_qty", "last_fill", "correction_of", "reason"])
         _require(p["side"] in ("BUY", "SELL"), "Unknown side")

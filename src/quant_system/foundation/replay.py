@@ -54,6 +54,8 @@ def build_manifest(store, boundary, *, seed=0, max_bytes=64 * 1024 * 1024):
             include(capture)
             for parent in referenced_ids(m):
                 include(parent)
+        records[ref_id]["journal_seq"] = row["seq"]
+        records[ref_id]["ready_us"] = row["ready_us"]
         return ref_id
 
     deliveries = []
