@@ -114,16 +114,15 @@ class QtPort:
         return str(self.control.dynamicCall("KOA_Functions(QString, QString)", "GetServerGubun", ""))
 
     def register(self, codes, fids):
-        for stage, screen, code_list, fid_list in (
-            ("MARKET_REGISTRATION", "9000", ";".join(codes), ";".join(map(str, fids))),
-            ("SESSION_REGISTRATION", "9001", "", "215"),
-        ):
-            result = self.control.dynamicCall("SetRealReg(QString, QString, QString, QString)", screen, code_list, fid_list, "0")
-            details = _api_result(stage, "SetRealReg", result)
-            details["screen"] = screen
-            self.registration_results.append(details)
-            if result != 0:
-                raise BridgeFailure(details)
+        # The controller includes FID 215 in this instrument-scoped request.
+        # Do not add an empty-code global request: the installed OCX rejected
+        # it with -105. Global/futures status semantics still need verification.
+        result = self.control.dynamicCall("SetRealReg(QString, QString, QString, QString)", "9000", ";".join(codes), ";".join(map(str, fids)), "0")
+        details = _api_result("MARKET_REGISTRATION", "SetRealReg", result)
+        details.update(screen="9000", registration_scope="SELECTED_INSTRUMENTS")
+        self.registration_results.append(details)
+        if result != 0:
+            raise BridgeFailure(details)
 
     def real(self, code, fid):
         return self.control.dynamicCall("GetCommRealData(QString, int)", code, fid)

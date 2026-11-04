@@ -26,7 +26,7 @@
 - TRADE의 부호 있는 수량은 명시적인 magnitude로 변환하고 aggressor는 UNKNOWN으로 남긴다. source trade ID·native event ID·공급자 sequence는 null이다. HHMMSS만으로 UTC·정확한 거래일·일련번호를 만들지 않는다.
 - 정상 반복 호가를 내용 hash로 제거하지 않는다. 같은 producer/epoch/counter의 **동일 frame 재전달**만 idempotent 처리한다. 같은 frame ID의 다른 raw는 별도 capture로 보존하고 격리한다.
 - `장시작시간`/FID 215 입력 경로는 제공하지만 **그 코드가 선택한 선물 세션의 상태를 나타내는지는 미확인**이다. 실제 프로필은 status_codes={}·session_mapping_verified=false가 기본이다. 합성 예시의 3/8 매핑을 실피드의 근거로 사용하지 않는다.
-- `SetRealReg`와 별도의 상태 화면 등록 경로를 구현했지만 **선택한 선물에서의 성공·초기 TR 필요 여부·상태 callback 범위는 #33 확인 대상**이다. 등록 반환 성공만으로 수신/동기화 성공을 선언하지 않는다. 실제 TR bootstrap이 필요한 것으로 확인되면 설치된 KOA 명세에 따라 어댑터를 보완한다.
+- `SetRealReg`는 선택 종목과 FID 전체(215 포함)를 화면 9000에 등록한다. 사용자 Windows에서 이 요청은 0을 반환했지만, 추가로 호출한 빈 종목코드/FID 215 등록은 -105(함수입력값 오류)로 거절됐다. 기본 경로에서 그 추가 요청을 제거했다. **선택한 선물의 실제 수신·초기 TR 필요 여부·상태 callback 범위는 계속 #33 확인 대상**이다. 등록 반환 성공만으로 수신/동기화 성공을 선언하지 않는다. 실제 TR bootstrap이나 별도 상태 구독이 필요한 것으로 확인되면 설치된 KOA 명세에 따라 어댑터를 보완한다.
 - PR #34 당시 features는 null이었다. #5 구현 이후 기본 파이프라인은 검증된 입력에 [microstructure-v1](microstructure-features.md)을 추가한다. 미확인 상품/거래 상태에서는 계속 null이다. 진입 필터는 #6, 주문/계좌 원장은 #7 이후의 범위다.
 
 ## 이용 가능성과 복구
@@ -85,9 +85,9 @@ $FutureCode = "KOA_STUDIO_CONFIRMED_CODE"
 
 probe는 OCX 실제 생성과 GUI timer 실행만 확인하며 로그인하지 않는다. 수집 명령은 사용자가 공식 창에서 로그인하고 모의 서버 여부가 확인된 경우에만 시세 구독을 시도한다. 반환 보고서에 모의 확인·type별 callback 건수·spool fsync/drop/high-water/지연을 남긴다. 필요한 type을 받지 못하면 INCOMPLETE_COLLECTION으로 종료한다. `real_feed_verified=false`는 현장 대조가 아직 별도라는 의미다. OBSERVED는 실제 callback 수신 출처를 뜻하며 모의 시세와 거래소 실거래의 일치 보증이 아니다.
 
-수집 실패 시 `error_details.stage`로 `MOCK_LOGIN`, `MARKET_REGISTRATION`(화면 9000), `SESSION_REGISTRATION`(화면 9001)을 구분한다. 등록 실패에는 `api_method`, `screen`, `return_value`, `return_type`을 기록하며, 앞서 성공한 등록 결과도 `registration_results`에 보존한다. `None` 등의 미확인 반환값을 성공으로 바꾸지 않는다. 임의 예외 메시지나 예상하지 않은 COM 문자열은 출력하지 않는다.
+수집 실패 시 `error_details.stage`로 `MOCK_LOGIN`과 `MARKET_REGISTRATION`(화면 9000)을 구분한다. 등록 결과에는 `api_method`, `screen`, `registration_scope`, `return_value`, `return_type`을 기록하고 `registration_results`에 보존한다. `registration_scope=SELECTED_INSTRUMENTS`는 선택 종목에 대한 요청이며 전역 장 상태의 검증을 뜻하지 않는다. 이전 버전의 `SESSION_REGISTRATION`(화면 9001)은 빈 종목코드 등록 실패를 가리킨다. `None` 등의 미확인 반환값을 성공으로 바꾸지 않는다. 임의 예외 메시지나 예상하지 않은 COM 문자열은 출력하지 않는다.
 
-`mock_login_confirmed`와 `login_error_code`는 로그인 자체의 결과다. 모의 로그인이 확인된 뒤 등록이 실패해도 로그인 성공 사실을 지우지 않는다. `registration_confirmed`는 두 등록 호출이 모두 성공했을 때만 true다. 이 값이 true여도 callback 수신과 실제 세션/FID 적합성 검증이 완료된 것은 아니다. 종료 중 추가 오류가 발생하면 최초 오류를 유지하고 `secondary_errors`에 별도로 기록한다.
+`mock_login_confirmed`와 `login_error_code`는 로그인 자체의 결과다. 모의 로그인이 확인된 뒤 등록이 실패해도 로그인 성공 사실을 지우지 않는다. `registration_confirmed`는 선택 종목 등록 호출이 성공했을 때 true다. 이 값이 true여도 callback 수신과 실제 세션/FID 적합성 검증이 완료된 것은 아니다. `장시작시간`을 포함한 필수 callback이 없으면 계속 `INCOMPLETE_COLLECTION`이고, 코어는 장 상태가 UNKNOWN이면 이용을 차단한다. 종료 중 추가 오류가 발생하면 최초 오류를 유지하고 `secondary_errors`에 별도로 기록한다.
 
 이전 버전이 `RuntimeError`만 보고한 경우에는 같은 PowerShell 창에서 수집 파일의 연결 이벤트를 확인한다. 이는 등록 API의 반환값을 복구하지는 않지만, 로그인과 수집 등록의 실패를 구분하는 근거가 된다.
 
