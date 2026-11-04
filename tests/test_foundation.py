@@ -8,6 +8,7 @@ import sys
 import tempfile
 import unittest
 from copy import deepcopy
+from contextlib import closing
 from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
@@ -487,9 +488,10 @@ os._exit(77)
 
     def test_unrelated_existing_database_is_rejected_unchanged(self):
         path = Path(self.tmp.name) / "other.db"
-        with sqlite3.connect(path) as other:
-            other.execute("CREATE TABLE untouched(value TEXT)")
-            other.execute("INSERT INTO untouched VALUES('preserve')")
+        with closing(sqlite3.connect(path)) as other:
+            with other:
+                other.execute("CREATE TABLE untouched(value TEXT)")
+                other.execute("INSERT INTO untouched VALUES('preserve')")
         before = path.read_bytes()
         with self.assertRaises(ValidationError):
             JournalStore(path)
