@@ -12,6 +12,7 @@ from quant_system.foundation.replay import ReplaySession, build_manifest
 from quant_system.foundation.store import JournalStore
 from quant_system.foundation.values import decode, encode, timestamp, utc_us
 from quant_system.market.feed import MarketFeed
+from quant_system.market.feature_replay import verify_feature_replay
 
 
 def main():
@@ -54,11 +55,13 @@ def main():
         boundary = store.boundary("probe", "market", at=frame["received_at"], decision_id="probe-end")
         manifest = build_manifest(store, boundary)
         replay = ReplaySession(manifest)
+        feature_verification = verify_feature_replay(manifest)
         latency = {key: {"p95": sorted(values)[math.ceil(len(values) * .95) - 1], "p99": sorted(values)[math.ceil(len(values) * .99) - 1]} for key, values in samples.items()}
         result = {"environment": environment_report(), "book_events": args.events, "elapsed_seconds": elapsed, "events_per_second": args.events / elapsed,
                   "latency_ms": latency, "metrics": feed.metrics, "healthy": store.healthy_at(boundary),
                   "book_usable": store.usable(boundary, "book:SIM:KR-FUT1"), "integrity": store.verify_integrity(),
                   "replay_speed_independent": replay.trace_digest(speed=1) == replay.trace_digest(speed=1000),
+                  "feature_recomputation": feature_verification,
                   "wal_bytes_before_checkpoint": Path(str(store.path) + "-wal").stat().st_size, "checkpoint": store.checkpoint(),
                   "scope": "single-process synthetic callbacks with virtual availability; not live feed latency/capacity"}
         print(encode(result).decode())

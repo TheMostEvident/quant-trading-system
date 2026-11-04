@@ -9,7 +9,7 @@ from quant_system.foundation.values import decode, encode, now_utc, timestamp, u
 from .feed import MarketFeed
 
 
-def ingest_file(input_path, database, run_id, profile, *, manifest_path=None, follow=False, seconds=60, simulate_clock=False):
+def ingest_file(input_path, database, run_id, profile, *, manifest_path=None, follow=False, seconds=60, simulate_clock=False, feature_config=None):
     if type(seconds) not in (int, float) or seconds <= 0 or seconds > 3600:
         raise ValidationError("Follow duration must be 0 < seconds <= 3600")
     if simulate_clock and (profile.get("data_origin") != "SYNTHETIC" or follow):
@@ -19,7 +19,7 @@ def ingest_file(input_path, database, run_id, profile, *, manifest_path=None, fo
     if manifest_path and Path(manifest_path).exists():
         raise ValidationError("Manifest destination already exists")
     with JournalStore(database) as store:
-        feed = MarketFeed(store, run_id, profile)
+        feed = MarketFeed(store, run_id, profile, feature_config=feature_config)
         consumer_epoch = "market-consumer:" + run_id
 
         def deliver(at):

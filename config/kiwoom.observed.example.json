@@ -3,7 +3,7 @@
   "data_origin": "OBSERVED",
   "instruments": [
     {"source_code": "REPLACEWITHKOACODE", "instrument_id": "KRX:REPLACEWITHCONTRACT", "trading_date": "2026-11-04",
-     "specification": {"verification_status": "PENDING_EXTRA_ISSUE_33", "quantity_unit": "CONTRACT"},
+     "specification": {"verification_status": "PENDING_EXTRA_ISSUE_33", "quantity_unit": "CONTRACT", "price_unit": null, "tick_size": null},
      "spec_verified": false, "price_encoding": "SIGNED_MAGNITUDE"}
   ],
   "status_codes": {},

@@ -13,6 +13,7 @@ from quant_system.foundation.values import decode, digest, encode, now_utc, time
 
 from .mapping import BOOK_TYPE, TRADE_TYPE, STATUS_TYPE, DEPTH, GUIDE
 from .profile import validate_profile
+from .features import FeatureClock, FeatureEngine
 
 _NUMBER = re.compile(r"[+-]?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?\Z")
 _TIME = re.compile(r"(?:[01][0-9]|2[0-3])[0-5][0-9][0-5][0-9]\Z")
@@ -86,14 +87,18 @@ class MarketFeed:
     independent core ingest clock so malformed/reordered input can be preserved.
     """
 
-    def __init__(self, store, run_id, profile, *, consumer="market", mode=None):
+    def __init__(self, store, run_id, profile, *, consumer="market", mode=None, feature_config=None):
         self.store, self.run_id, self.consumer = store, run_id, consumer
         self.profile = validate_profile(profile)
+        self.features = FeatureEngine(feature_config, max_gap_ms=self.profile["stale_after_ms"])
+        self.feature_ref = run_id + ":features:" + digest(encode(self.features.definition()))
+        self.features.config_ref = self.feature_ref
+        self.feature_clock = None
         if store.connection.execute("SELECT 1 FROM runs WHERE run_id=?", (run_id,)).fetchone():
             raise ValidationError("A new feed process requires a new run; old state cannot silently resume")
         origin = self.profile["data_origin"]
         mode = mode or ("SYNTHETIC_REPLAY" if origin == "SYNTHETIC" else "SHADOW")
-        store.register_run(run_id, mode=mode, data_origin=origin, config={"market_profile": self.profile}, code_version="market-v1")
+        store.register_run(run_id, mode=mode, data_origin=origin, config={"market_profile": self.profile, "features": self.features.definition()}, code_version="market-features-v1")
         self.profile_ref = run_id + ":market-profile:" + digest(encode(self.profile))
         self.ingest_epoch = str(uuid.uuid4())
         self.ingest_count = 0
@@ -116,6 +121,7 @@ class MarketFeed:
         if self.initialized:
             return
         self.store.put_artifact(self.profile_ref, self.run_id, {"profile": self.profile, "guide": GUIDE}, ready_at=at)
+        self.store.put_artifact(self.feature_ref, self.run_id, self.features.definition(), ready_at=at)
         for binding in self.profile["instruments"]:
             ref = self.run_id + ":spec:" + digest(encode(binding))
             self.store.put_artifact(ref, self.run_id, binding, ready_at=at)
@@ -152,8 +158,7 @@ class MarketFeed:
             self.last_health = healthy
 
     def _emit(self, state, capture, ready_at, kind, *, flags=(), book=None, trade=None, replaces_book=False):
-        if self.live_timing:
-            ready_at = timestamp(max(utc_us(now_utc()), utc_us(ready_at), self.last_ready_us or utc_us(ready_at)))
+        ready_at = timestamp(max(utc_us(ready_at), self.last_ready_us or utc_us(ready_at)))
         self.last_ready_us = max(self.last_ready_us or utc_us(ready_at), utc_us(ready_at))
         state.revision += 1
         message_id = capture.capture_id + ":m:" + digest(state.binding["instrument_id"].encode())[:16] + ":" + str(state.revision)
@@ -184,13 +189,28 @@ class MarketFeed:
                    "payload": {"instrument_spec_ref": state.spec_ref, "trading_date": state.binding["trading_date"], "update_kind": kind,
                                "market_status": status, "book": book, "trade": trade, "features": None}}
         validate_message(message)
+        feature_update = self.features.prepare(message, self.feature_clock, state.binding["specification"])
+        message["payload"]["features"] = feature_update.features
+        if self.live_timing:
+            ready_at = timestamp(max(utc_us(now_utc()), utc_us(ready_at), self.last_ready_us))
+            message["ready_at"] = ready_at
+            self.last_ready_us = utc_us(ready_at)
+        if kind in ("BOOK", "TRADE") and utc_us(ready_at) - utc_us(capture.received_at) >= min(self.profile["stale_after_ms"], self.profile["max_transport_delay_ms"]) * 1000:
+            message["quality_flags"] = sorted(set(message["quality_flags"]) | {"STALE"})
+            if kind == "BOOK":
+                state.valid_book = False
+                book["sync_status"] = "UNSYNCED"
+            message["payload"]["features"] = None
+            feature_update = self.features.prepare(message, self.feature_clock, state.binding["specification"])
+        validate_message(message)
         key = "book:" + state.binding["instrument_id"] if kind == "BOOK" or replaces_book else kind.lower() + ":" + state.binding["instrument_id"]
         expiry = None
         if kind == "BOOK" and state.valid_book:
             end = state.book_received_us + self.profile["stale_after_ms"] * 1000
             if end > utc_us(ready_at):
                 expiry = timestamp(end)
-        self.store.publish(capture.capture_id, message, [self.consumer], version=Version(key, state.revision, ready_at, expiry), normalization_version="kiwoom-futures-v1")
+        self.store.publish(capture.capture_id, message, [self.consumer], version=Version(key, state.revision, ready_at, expiry), normalization_version="kiwoom-futures-v2")
+        self.features.commit(feature_update)
         self.metrics["messages"] += 1
         return message
 
@@ -239,6 +259,8 @@ class MarketFeed:
         capture = Capture(capture_id, self.run_id, "kiwoom-core-ingest", self.ingest_epoch, self.ingest_count, "kiwoom-openapi-plus", "callback-spool", raw,
                           received, ready_at, time.monotonic_ns(), representation="OCX_CALLBACK_FIELDS", media_type="application/x-kiwoom-callback+json")
         self.store.record_capture(capture)
+        self.feature_clock = (FeatureClock(frame["producer_id"], frame["epoch"], frame["sequence"], frame["monotonic_ns"], capture.capture_id)
+                              if frame is not None else None)
         self.metrics["raw_frames"] += 1
         output = []
         try:
@@ -377,6 +399,7 @@ class MarketFeed:
         return output
 
     def tick(self, *, at=None, transport_failed=False):
+        self.feature_clock = None
         at = at or now_utc()
         if self.last_ready_us is not None:
             at = timestamp(max(utc_us(at), self.last_ready_us))

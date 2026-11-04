@@ -80,3 +80,17 @@ PR #30과 Issue #2의 범위·계약, PR #31의 공통 기반 설계는 main에 
 | D-030 | 재시작은 새 run과 연결·상태·모든 선택 상품의 새 full snapshot으로 시작 | 과거 정상 book을 부활시키지 않음; 공급자 무손실/완전 순서를 보장하는 resync는 아님 |
 
 구현과 시험·실행 조건은 [수집 안내](kiwoom-feed.md), 테스트 근거는 [기계 판독 결과](verification/kiwoom-20261104.json)를 따른다.
+
+## Issue #5 미시구조 지표 (2026-11-04)
+
+| ID | 선택 | 근거·경계 |
+| --- | --- | --- |
+| D-031 | microstructure-v1을 v0.2 봉투의 선택적 feature extension으로 구현 | 기존 7종 계약 유지; 설정 artifact·단위·clock·상태/coverage 명시 |
+| D-032 | 가중 OBI와 가격 이동을 반영하는 관측 top-1 OFI를 구분 | snapshots 사이의 flow이며 모든 거래소 이벤트를 복원했다는 뜻이 아님 |
+| D-033 | 시간 EMA와 event EMA·관측당/시간당 변화율을 구분 | 첫 rate와 0시간 rate는 null; 미래 관측·wall clock을 수학 계산에 사용하지 않음 |
+| D-034 | 특징을 준비하고 메시지 커밋 후에만 상태 반영 | publish 실패 시 EMA/window 상태가 미커밋 메시지를 참조하지 않음; 계산 중 stale이 되면 결과 폐기 |
+| D-035 | producer clock·spec/date/unit 변경 또는 freshness gap에서 새 계산 구간 시작 | 이전 정상 자료로 GAP·stale을 메우지 않음; source freshness가 계산 연속성의 상한 |
+| D-036 | bounded time-window overflow에서 partial sum을 null로 표시 | 누락이 시간창 밖으로 나갈 때까지 coverage=false; raw는 저장 |
+| D-037 | replay에서 저장된 정규화 입력과 raw clock으로 독립 재계산 | producer journal order·ready cutoff·계보 검사; consumer 재전달을 다시 계산하지 않음 |
+
+공식 식의 근거·프로젝트 선택·손계산 표·125개 검증과 잔여 #33 조건은 [미시구조 지표](microstructure-features.md)를 따른다.

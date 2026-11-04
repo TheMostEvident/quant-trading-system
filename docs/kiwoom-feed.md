@@ -27,7 +27,7 @@
 - 정상 반복 호가를 내용 hash로 제거하지 않는다. 같은 producer/epoch/counter의 **동일 frame 재전달**만 idempotent 처리한다. 같은 frame ID의 다른 raw는 별도 capture로 보존하고 격리한다.
 - `장시작시간`/FID 215 입력 경로는 제공하지만 **그 코드가 선택한 선물 세션의 상태를 나타내는지는 미확인**이다. 실제 프로필은 status_codes={}·session_mapping_verified=false가 기본이다. 합성 예시의 3/8 매핑을 실피드의 근거로 사용하지 않는다.
 - `SetRealReg`와 별도의 상태 화면 등록 경로를 구현했지만 **선택한 선물에서의 성공·초기 TR 필요 여부·상태 callback 범위는 #33 확인 대상**이다. 등록 반환 성공만으로 수신/동기화 성공을 선언하지 않는다. 실제 TR bootstrap이 필요한 것으로 확인되면 설치된 KOA 명세에 따라 어댑터를 보완한다.
-- `features`는 null이다. OBI/OFI/EMA는 #5, 진입 필터는 #6, 주문/계좌 원장은 #7 이후의 범위다.
+- PR #34 당시 features는 null이었다. #5 구현 이후 기본 파이프라인은 검증된 입력에 [microstructure-v1](microstructure-features.md)을 추가한다. 미확인 상품/거래 상태에서는 계속 null이다. 진입 필터는 #6, 주문/계좌 원장은 #7 이후의 범위다.
 
 ## 이용 가능성과 복구
 
@@ -98,7 +98,7 @@ probe는 OCX 실제 생성과 GUI timer 실행만 확인하며 로그인하지 �
 
 ## 검증 결과와 범위
 
-Linux 64-bit / Python 3.12.14 / SQLite 3.53.1에서 **83개 unittest**가 통과했다. 기존 foundation 45개와 `tests/test_market.py`의 M01~M38이다. 패키지 wheel을 별도 venv에 설치한 결과·소스 hash·합성 측정은 [검증 JSON](verification/kiwoom-20261104.json)에 기록한다.
+PR #34 당시 Linux 64-bit / Python 3.12.14 / SQLite 3.53.1에서 **83개 unittest**가 통과했다. 기존 foundation 45개와 `tests/test_market.py`의 M01~M38이다. 당시 설치·소스 hash·합성 측정은 [검증 JSON](verification/kiwoom-20261104.json)에 기록했다. 지표 추가 이후의 전체 125개 검증은 [새 지표 안내](microstructure-features.md)를 따른다.
 
 wheel은 별도 기본 venv에 `--no-index --no-deps`로 설치했고 PYTHONPATH를 제거한 채 시험했다. 설치한 CLI로 fixture 정규화·DB 무결성·manifest 재생을 실행했고 `pip check`도 통과했다.
 

@@ -1,0 +1,9 @@
+{
+  "feature_version": "microstructure-v1",
+  "depth": 5,
+  "weights": ["1", "1", "1", "1", "1"],
+  "smoothing": {"method": "TIME_EMA", "tau_ms": 500, "alpha": null},
+  "window_ms": 1000,
+  "max_observation_gap_ms": 2000,
+  "max_window_events": 4096
+}
