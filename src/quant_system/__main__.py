@@ -42,6 +42,9 @@ def main(argv=None):
     oms = sub.add_parser("oms-scenario", help="Process explicit synthetic OMS inputs and persist accounting; no broker transport")
     oms.add_argument("scenario")
     oms.add_argument("--output-dir", required=True)
+    paper = sub.add_parser("paper-scenario", help="Match explicit synthetic futures observations after latency; no broker connection")
+    paper.add_argument("scenario")
+    paper.add_argument("--output-dir", required=True)
     profile_draft = sub.add_parser("market-profile-draft", help="Create an unverified observed profile; never enables the input gate")
     profile_draft.add_argument("--template", default="config/kiwoom.observed.example.json")
     profile_draft.add_argument("--code", required=True)
@@ -89,6 +92,9 @@ def main(argv=None):
     elif args.command == "oms-scenario":
         from .execution.scenario import run_scenario
         result = run_scenario(args.scenario, args.output_dir)
+    elif args.command == "paper-scenario":
+        from .execution.paper_scenario import run_paper_scenario
+        result = run_paper_scenario(args.scenario, args.output_dir)
     elif args.command == "market-profile-draft":
         from .market.field_run import make_profile, write_new_json
         result = make_profile(decode(Path(args.template).read_bytes()), args.code, args.trading_date)
