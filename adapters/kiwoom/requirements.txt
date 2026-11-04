@@ -1,0 +1,2 @@
+# Only for the separate Windows bridge. Actual wheel/bitness support is #33.
+PyQt5>=5.15,<6

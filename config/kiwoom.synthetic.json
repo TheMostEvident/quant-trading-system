@@ -1,0 +1,16 @@
+{
+  "profile_version": 1,
+  "data_origin": "SYNTHETIC",
+  "instruments": [
+    {"source_code": "SIMFUT1", "instrument_id": "SIM:KR-FUT1", "trading_date": "2026-11-04",
+     "specification": {"synthetic_only": true, "quantity_unit": "CONTRACT", "market": "SIM_DOMESTIC_INDEX_FUTURE"},
+     "spec_verified": true, "price_encoding": "SIGNED_MAGNITUDE"}
+  ],
+  "status_codes": {"3": "CONTINUOUS", "8": "CLOSED"},
+  "session_mapping_verified": true,
+  "mapping_evidence": "synthetic fixture only; installed futures session mapping is not verified",
+  "stale_after_ms": 2000,
+  "max_transport_delay_ms": 1000,
+  "heartbeat_timeout_ms": 3000,
+  "max_frame_bytes": 65536
+}

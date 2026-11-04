@@ -1,0 +1,16 @@
+{
+  "profile_version": 1,
+  "data_origin": "OBSERVED",
+  "instruments": [
+    {"source_code": "REPLACEWITHKOACODE", "instrument_id": "KRX:REPLACEWITHCONTRACT", "trading_date": "2026-11-04",
+     "specification": {"verification_status": "PENDING_EXTRA_ISSUE_33", "quantity_unit": "CONTRACT"},
+     "spec_verified": false, "price_encoding": "SIGNED_MAGNITUDE"}
+  ],
+  "status_codes": {},
+  "session_mapping_verified": false,
+  "mapping_evidence": "https://download.kiwoom.com/web/openapi/kiwoom_openapi_plus_devguide_ver_1.7.pdf; actual code/session/FID checks pending #33",
+  "stale_after_ms": 2000,
+  "max_transport_delay_ms": 1000,
+  "heartbeat_timeout_ms": 3000,
+  "max_frame_bytes": 65536
+}
