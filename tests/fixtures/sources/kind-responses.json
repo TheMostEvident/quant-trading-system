@@ -1,0 +1,1 @@
+[{"request":{"source":"KIND_RSS","url":"https://kind.krx.co.kr/disclosure/synthetic.xml","cursor":1,"method":"GET"},"status":200,"media_type":"application/rss+xml","body_file":"kind-page.xml","received_at":"2026-11-04T01:01:00.000000Z","monotonic_ns":100}]

@@ -111,6 +111,7 @@ Layer 1·3은 seed 목록과 고정 정책으로 먼저 검증한다. Layer 2 �
 - [Extra Issue 1: 초기 TR 진단·프로필·실제 저장/재생·중단/재시작 절차](docs/windows-field-validation.md)
 - [Issue #8: 지연·유동성·비용을 반영한 내부 모의 집행](docs/paper-execution.md)
 - [Issue #9: 전체 합성 경로·독립 재계산·장애·위험 한도 검증](docs/layer1-verification.md)
+- [Issue #10: 네이버 뉴스·KIND RSS·KRX 페이지 수집과 실제 연결의 경계](docs/source-collection.md)
 - [OBI·OFI·EMA·시간 변화율·손계산·재계산 검증](docs/microstructure-features.md)
 - [결정 기록](docs/decisions.md)
 - [이전 현물 중심 계약 v0.1 — 이력 보존](docs/contracts-v0.1.md)
@@ -125,3 +126,4 @@ Layer 1·3은 seed 목록과 고정 정책으로 먼저 검증한다. Layer 2 �
 - [국내 선물 수집기 #4](https://github.com/TheMostEvident/quant-trading-system/issues/4)
 - [미시구조 지표 #5](https://github.com/TheMostEvident/quant-trading-system/issues/5)
 - [Extra Issue 1 #33 — Windows·OCX·실피드 검증](https://github.com/TheMostEvident/quant-trading-system/issues/33)
+- [Extra Issue 4 #47 — 초기 세 소스 이후의 추가 뉴스·공시 소스 확장](https://github.com/TheMostEvident/quant-trading-system/issues/47)
