@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "source": "NAVER_NEWS",
+  "query": "국내 선물",
+  "display": 100,
+  "max_pages": 2,
+  "max_requests": 4,
+  "max_attempts": 2,
+  "min_interval_seconds": 1,
+  "timeout_seconds": 15,
+  "max_response_bytes": 4194304
+}

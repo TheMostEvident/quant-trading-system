@@ -1,0 +1,4 @@
+[
+  {"request":{"source":"NAVER_NEWS","url":"https://openapi.naver.com/v1/search/news.json?query=synthetic&display=2&start=1&sort=date","cursor":1,"method":"GET"},"status":200,"media_type":"application/json","body_file":"naver-page1.json","received_at":"2026-11-04T01:00:00.000000Z","monotonic_ns":100},
+  {"request":{"source":"NAVER_NEWS","url":"https://openapi.naver.com/v1/search/news.json?query=synthetic&display=2&start=3&sort=date","cursor":3,"method":"GET"},"status":200,"media_type":"application/json","body_file":"naver-page2.json","received_at":"2026-11-04T01:00:01.000000Z","monotonic_ns":200}
+]

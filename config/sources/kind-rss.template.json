@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "source": "KIND_RSS",
+  "url": "COPY_THE_RSS_URL_FROM_THE_OFFICIAL_KIND_DISCLOSURE_PAGE",
+  "max_pages": 1,
+  "max_requests": 2,
+  "max_attempts": 2,
+  "min_interval_seconds": 1,
+  "timeout_seconds": 15,
+  "max_response_bytes": 4194304
+}

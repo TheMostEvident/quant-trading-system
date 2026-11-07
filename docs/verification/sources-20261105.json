@@ -1,0 +1,59 @@
+{
+  "verification_date": "2026-11-05",
+  "timezone": "Asia/Seoul",
+  "development_issue": 10,
+  "additional_sources_issue": {"extra_number": 4, "github_number": 47},
+  "existing_extra_issues_preserved": {"1": 33, "2": 43, "3": 45},
+  "runtime": {"platform": "Linux", "python": "3.12.14", "sqlite": "3.53.1"},
+  "source_tests": {"total": 421, "new": 37, "failures": 0, "errors": 0, "skipped": 0, "seconds": 16.265},
+  "installed_wheel_tests": {"total": 421, "failures": 0, "errors": 0, "skipped": 0, "seconds": 15.987},
+  "package": {
+    "build": "pip wheel --no-deps --no-build-isolation --no-index",
+    "build_tools": {"setuptools": "84.2.1", "wheel": "0.48.0"},
+    "wheel_sha256": "4984dd15ef109730a7331248890d5eb69e4b819946cc37190ba267ddf6d85420",
+    "runtime_dependencies": [],
+    "pip_check": "passed",
+    "installed_modules_byte_matched": 51,
+    "installed_validation_tree_contains_source_package": false
+  },
+  "offline_cli": {
+    "NAVER_NEWS": {"requests": 2, "document_observations": 4, "repeated_variants": 1, "new_variants": 1, "reparse_passed": true, "raw_only": false},
+    "KIND_RSS": {"requests": 1, "document_observations": 2, "reparse_passed": true, "raw_only": false, "fixture_endpoint_is_synthetic": true},
+    "KRX_PAGE": {"requests": 1, "page_observations": 1, "reparse_passed": true, "raw_only": true, "content_verified": false, "metadata_normalized": false},
+    "sqlite_integrity": true,
+    "data_origin": "SYNTHETIC",
+    "network_calls": 0,
+    "event_packets_emitted": 0
+  },
+  "verified_behaviors": [
+    "raw committed before normalization",
+    "fetch/item artifacts and identity index commit atomically",
+    "transaction failure retains raw and rolls back normalized observations",
+    "all repeated and changed source observations retained",
+    "synthetic identity history cannot preempt observed first collection",
+    "source publication meaning/precision preserved; date or missing timezone not invented as UTC",
+    "search window, page/request/retry budgets and incomplete short page reported",
+    "HTTP errors retained; 429 Retry-After honored within bounded session",
+    "runtime-only Naver headers; forged URLs rejected; redirects not followed",
+    "sensitive echoed entity omitted explicitly; size overflow marked as prefix",
+    "RSS HTML, DTD/entity and NUL/encoding bypass rejected",
+    "stored raw entities reparsed without network",
+    "fresh run IDs; immutable source observation tables"
+  ],
+  "live_verification": {
+    "NAVER_NEWS": "not performed; runtime application credentials unavailable",
+    "KIND_RSS": "not performed; actual copied RSS endpoint and response scope require confirmation",
+    "KRX_PAGE": "not accepted; direct research-environment request returned 403; only raw-page path and synthetic fixture verified",
+    "live_access_verified": false,
+    "dataset_completeness_verified": false,
+    "windows_tests_performed": false
+  },
+  "remaining_boundaries": [
+    "KRX per-article listing, dynamic requests and attachments not extracted",
+    "KIND original disclosure/attachments not fetched; RSS schema fixture is synthetic",
+    "Naver search snippets are not full articles; links are references only",
+    "Issue 11 structural parsing, Issue 12 entity/event dedup/corrections, Issue 13 inference and Issue 14 workers remain separate",
+    "DART, SEC and other source adapters are deferred to Extra Issue 4 (#47)",
+    "Extra Issues 1 (#33), 2 (#43) and 3 (#45) remain unverified"
+  ]
+}

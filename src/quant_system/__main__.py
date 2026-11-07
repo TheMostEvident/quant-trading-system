@@ -48,6 +48,17 @@ def main(argv=None):
     layer1 = sub.add_parser("layer1-scenario", help="Run synthetic callbacks through features, policy, OMS and paper execution")
     layer1.add_argument("scenario")
     layer1.add_argument("--output-dir", required=True)
+    source = sub.add_parser("source-collect", help="Collect only Naver News, KIND RSS or a KRX raw HTML page; no event inference")
+    source.add_argument("--config", required=True)
+    source.add_argument("--database", required=True)
+    source.add_argument("--run-id", required=True)
+    source_mode = source.add_mutually_exclusive_group(required=True)
+    source_mode.add_argument("--fixture")
+    source_mode.add_argument("--live", action="store_true")
+    source.add_argument("--report")
+    source_verify = sub.add_parser("verify-source-collection", help="Reparse stored source entities without network access")
+    source_verify.add_argument("database")
+    source_verify.add_argument("--run-id", required=True)
     oms_audit = sub.add_parser("audit-oms", help="Independently replay saved synthetic economic inputs and matching bounds")
     oms_audit.add_argument("directory")
     oms_audit.add_argument("--output", required=True)
@@ -104,6 +115,14 @@ def main(argv=None):
     elif args.command == "layer1-scenario":
         from .validation.layer1 import run_layer1
         result = run_layer1(args.scenario, args.output_dir)
+    elif args.command == "source-collect":
+        from .sources.cli import run_collection
+        result = run_collection(args.config, args.database, args.run_id, fixture=args.fixture, live=args.live, report=args.report)
+        exit_code = 0 if result["collection_ok"] else 2
+    elif args.command == "verify-source-collection":
+        from .sources.journal import verify_collection
+        with JournalStore(args.database, read_only=True) as store:
+            result = verify_collection(store, args.run_id)
     elif args.command == "audit-oms":
         from .validation.reference import audit_oms
         from .market.field_run import write_new_json
